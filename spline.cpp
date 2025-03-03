@@ -1,0 +1,114 @@
+//-----------------------------------------------------------------------------------------
+/**
+ * \file       spline.cpp
+ * \author     Šárka Prokopová
+ * \date       2022/4/28
+ * \brief      Everything for computing spline
+ *
+*/
+//-----------------------------------------------------------------------------------------
+#include "spline.h"
+#include <iostream>
+
+// length of vector check
+bool vectorLen(const glm::vec3& vect) {
+    return !vect.x && !vect.y && !vect.z;
+}
+
+// align current coordinate system
+glm::mat4 alignObject(const glm::vec3& position, const glm::vec3& front, const glm::vec3& up) {
+
+    glm::vec3 z = -glm::normalize(front);
+
+    if (vectorLen(z))
+        z = glm::vec3(0.0, 0.0, 1.0);
+
+    glm::vec3 x = glm::normalize(glm::cross(up, z));
+
+    if (vectorLen(x))
+        x = glm::vec3(1.0, 0.0, 0.0);
+
+    glm::vec3 y = glm::cross(z, x);
+    glm::mat4 matrix = glm::mat4(
+        x.x, x.y, x.z, 0.0,
+        y.x, y.y, y.z, 0.0,
+        z.x, z.y, z.z, 0.0,
+        position.x, position.y, position.z, 1.0
+    );
+
+    return matrix;
+}
+
+// evalucate one segment of the curve
+glm::vec3 evaluateCurveSegment(const glm::vec3 points[], const float t) {
+
+	float t2 = t * t;
+	float t3 = t2 * t;
+	glm::vec4 ts(t3, t2, t, 1);
+	glm::mat4 values(
+		-1, 3, -3, 1,
+		2, -5, 4, -1,
+		-1, 0, 1, 0,
+		0, 2, 0, 0
+	);
+	glm::vec4 polynom = ts * transpose(values);
+	glm::vec3 res = points[0] * polynom[0]
+		+ points[1] * polynom[1]
+		+ points[2] * polynom[2]
+		+ points[3] * polynom[3];
+
+	res *= 0.5;
+	return res;
+}
+
+// evaluate first derivative of one segment
+glm::vec3 evalCurveSegFirstDev(const glm::vec3 points[], const float t) {
+	float t2 = t * t;
+	glm::vec4 ts(3 * t2, 2 * t, 1, 0);
+	glm::mat4 values(
+		-1, 3, -3, 1,
+		2, -5, 4, -1,
+		-1, 0, 1, 0,
+		0, 2, 0, 0
+	);
+	glm::vec4 polynom = ts * transpose(values);
+	glm::vec3 res = points[0] * polynom[0]
+		+ points[1] * polynom[1]
+		+ points[2] * polynom[2]
+		+ points[3] * polynom[3];
+
+	res *= 0.5;
+	return res;
+}
+
+// evaluate all parts of the curve
+glm::vec3 evaluateClosedCurve(const glm::vec3 points[], const size_t count, const float t) {
+	glm::vec3 result(0.0, 0.0, 0.0);
+
+	int i = (int)t;
+	glm::vec3 newPoints[4];
+
+	newPoints[0] = points[(i - 1 + count) % count];
+	newPoints[1] = points[i % count];
+	newPoints[2] = points[(i + 1) % count];
+	newPoints[3] = points[(i + 2) % count];
+
+	result = evaluateCurveSegment(
+		newPoints,
+		t - i
+	);
+
+	return result;
+}
+
+ // evaluate first derivate of the whole curve
+glm::vec3 evalClosedCurveFirstDev(const glm::vec3 points[], const size_t count, const float t) {
+	int i = (int)t;
+	glm::vec3 newPoints[4];
+	newPoints[0] = points[(i - 1 + count) % count];
+	newPoints[1] = points[i % count];
+	newPoints[2] = points[(i + 1) % count];
+	newPoints[3] = points[(i + 2) % count];
+	glm::vec3 result = evalCurveSegFirstDev( newPoints, t - i );
+	return result;
+}
