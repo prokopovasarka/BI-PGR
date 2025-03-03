@@ -29,16 +29,8 @@ glm::vec3 activeStaticCenter = firstStatCenter;
 glm::vec3 actualPosition = firstStatPosition;
 glm::vec3 actualCenter = firstStatCenter;
 
-// booleans
-extern bool onPositionStatic;
-extern bool onPositionFree;
-extern bool changingPosition;
-extern float teleportSpeed;
-extern bool firstTime;
-extern GameState gameState;
-
 // switch between two different static positions
-void changePosition(bool* cameraPosition) {
+void cameraHandler::changePosition(bool* cameraPosition) {
 	if (*cameraPosition == 1)
 		*cameraPosition = 0;
 	else
@@ -57,7 +49,7 @@ void changePosition(bool* cameraPosition) {
 }
 
 // computing center view
-glm::vec3  computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, glm::vec3* cameraUpVector) {
+glm::vec3  cameraHandler::computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, glm::vec3* cameraUpVector) {
 	if (!gameState.curveMotion) {
 		positionInFreeMode = camera->position;
 		actualPosInFreeMode = camera->position;
@@ -82,7 +74,7 @@ glm::vec3  computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, 
 }
 
 // compute difference
-bool vectorDif(glm::vec3 t, glm::vec3 b) {
+bool cameraHandler::vectorDif(glm::vec3 t, glm::vec3 b) {
 	float pressize = 0.01;
 	float resX = t.x - b.x;
 	float resY = t.y - b.y;
@@ -94,7 +86,7 @@ bool vectorDif(glm::vec3 t, glm::vec3 b) {
 }
 
 // compute teleport between positions
-void computeCameraPosition(GameState gameState) {
+void cameraHandler::computeCameraPosition(GameState gameState) {
 
 	if (!gameState.freeCameraMode && !onPositionStatic) {
 		actualPosition = activeStaticPosition;
@@ -127,14 +119,14 @@ void computeCameraPosition(GameState gameState) {
 }
 
 // increase speed of movement
-void increaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
+void cameraHandler::increaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
 
 	camera->speed =
 		std::min(camera->speed + deltaSpeed, CAMERA_SPEED_MAX);
 }
 
 // decrease speed of movement
-void decreaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
+void cameraHandler::decreaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
 
 	camera->speed =
 		std::max(camera->speed - deltaSpeed, 0.0f);
@@ -142,7 +134,7 @@ void decreaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREME
 }
 
 // turning camera left
-void turnCameraLeft(Camera* camera, float deltaAngle) {
+void cameraHandler::turnCameraLeft(Camera* camera, float deltaAngle) {
 
 	camera->viewAngle += deltaAngle;
 
@@ -157,7 +149,7 @@ void turnCameraLeft(Camera* camera, float deltaAngle) {
 }
 
 // turning camera right
-void turnCameraRight(Camera* camera, float deltaAngle) {
+void cameraHandler::turnCameraRight(Camera* camera, float deltaAngle) {
 
 	camera->viewAngle -= deltaAngle;
 
@@ -171,7 +163,7 @@ void turnCameraRight(Camera* camera, float deltaAngle) {
 }
 
 // turning camera
-void turnCamera(Camera* camera, float deltaAngle) {
+void cameraHandler::turnCamera(Camera* camera, float deltaAngle) {
 
 	camera->viewAngle += deltaAngle;
 
@@ -187,7 +179,7 @@ void turnCamera(Camera* camera, float deltaAngle) {
 }
 
 // control borders for camera
-void controlBorders(Camera* camera) {
+void cameraHandler::controlBorders(Camera* camera) {
 	if (camera->position.x < -2.8) {
 		camera->position.x = -2.8;
 	}

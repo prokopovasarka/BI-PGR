@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="data.h" />
+    <ClInclude Include="gameEngine.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="render_stuff.h" />
     <ClInclude Include="setUni.h" />

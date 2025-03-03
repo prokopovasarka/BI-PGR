@@ -2,6 +2,7 @@
 #define __GAME_ENGINE_H
 #include "pgr.h"
 #include "render_stuff.h"
+#include "camera.h"
 
 extern SCommonShaderProgram shaderProgram;  // main shader
 extern SCommonShaderProgram waterShader;  // water shader
@@ -26,6 +27,13 @@ glm::vec4 day = glm::vec4(0.95f, 0.95f, 0.85f, 1.0f);
 glm::vec4 currentColor = day;  //current state od daytime
 std::list<Explosion*> explosions; //list of explosions
 
+struct GameObjects {
+
+    Camera* camera; //camera object
+    Object* banner; //banner object
+
+} gameObjects;
+
 class gameEngine {
 public:
     gameEngine() {
@@ -41,6 +49,7 @@ public:
     void initializeApplication();
     static void gameMenu(int choice);
     void createMenu(void);
+    static void finalizeApplication();
 
     struct corpseHandler {
     public:
@@ -53,13 +62,16 @@ public:
         static void timerCallback(int);
         static void passiveMouseMotionCallback(int mouseX, int mouseY);
         static void mouseCallback(int buttonPressed, int buttonState, int mouseX, int mouseY);
+        static void displayCallback();
+        static void reshapeCallback(int newWidth, int newHeight);
+        static void drawWindowContents();
 
     };
 
     struct keyBoardHandler {
     public:
         static void keyboardCallback(unsigned char keyPressed, int mouseX, int mouseY);
-        static void keyboardUpCallback(unsigned char keyReleased, int mouseX, int mouseY);
+        //static void keyboardUpCallback(unsigned char keyReleased, int mouseX, int mouseY);
         static void specialKeyboardCallback(int specKeyPressed, int mouseX, int mouseY);
         static void specialKeyboardUpCallback(int specKeyReleased, int mouseX, int mouseY);
 
@@ -71,6 +83,7 @@ private:
     corpseHandler m_corpseHandler;
     screenHandler m_screenHandler;
     keyBoardHandler m_keyBoardHandler;
+    static cameraHandler camHandler;
 };
 
 #endif 

@@ -2,7 +2,7 @@
 /**
  * \file       main.cpp
  * \author     Šárka Prokopová
- * \date       2022/4/28
+ * \date       2025/3/3
  * \brief      house by the lake
  *
  *  Interactive scene where user can move around and click on objects.
@@ -15,21 +15,13 @@
 #include <list>
 #include "pgr.h"
 #include "gameEngine.h"
-#include "render_stuff.h"
 #include "data.h"
-#include "camera.h"
 #include "water.h"
 #include "spline.h"
 
 
 gameEngine* gameHandler = new gameEngine();
-
-struct GameObjects {
-
-	Camera* camera; //camera object
-	Object* banner; //banner object
-
-} gameObjects;
+cameraHandler gameEngine::camHandler;
 
 Object* corpseObj; //init corpse object
 bool corpseAnimation; //if animation is on or off
@@ -166,7 +158,7 @@ void gameEngine::restartGame() {
 
 
 //-------------------------------------------------------------------DRAW GEOMETRY AND STUFF-------------------------------------------------------
-void drawWindowContents() {
+void gameEngine::screenHandler::drawWindowContents() {
 	// setup parallel projection
 	glm::mat4 orthoProjectionMatrix = glm::ortho(
 		-SCENE_WIDTH, SCENE_WIDTH,
@@ -186,14 +178,15 @@ void drawWindowContents() {
 	// compute to know where is the center - first time after restart
 	if (firstTime) {
 		glm::vec3 cameraUpVector = glm::vec3(0.0f, 0.0f, 1.0f);
-		computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
+		camHandler.computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
 		firstTime = false;
 	}
 	if (gameState.freeCameraMode && onPositionFree) {
 		onPositionStatic = false;
 		glm::vec3 cameraPosition = gameObjects.camera->position;
 		glm::vec3 cameraUpVector = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 cameraCenter = computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
+		camHandler.controlBorders(gameObjects.camera);
+		glm::vec3 cameraCenter = camHandler.computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
 
 		viewMatrix = glm::lookAt(
 			cameraPosition,
@@ -204,7 +197,7 @@ void drawWindowContents() {
 	if (gameState.curveMotion) { // set camera for curve motion
 		glm::vec3 cameraPosition = gameObjects.camera->position;
 		glm::vec3 cameraUpVector = glm::vec3(0.0f, 0.0f, 1.0f);
-		glm::vec3 cameraCenter = computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
+		glm::vec3 cameraCenter = camHandler.computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
 
 		viewMatrix = glm::lookAt(
 			cameraPosition,
@@ -259,17 +252,17 @@ void drawWindowContents() {
 
 // Called to update the display. You should call glutSwapBuffers after all of your
 // rendering to display what you rendered.
-void displayCallback() {
+void gameEngine::screenHandler::displayCallback() {
 	GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 
 	glClear(mask);
 
-	drawWindowContents();
+	gameEngine::screenHandler::drawWindowContents();
 
 	glutSwapBuffers();
 }
 
-void reshapeCallback(int newWidth, int newHeight) {
+void gameEngine::screenHandler::reshapeCallback(int newWidth, int newHeight) {
 
 	gameState.windowWidth = newWidth;
 	gameState.windowHeight = newHeight;
@@ -315,8 +308,8 @@ void gameEngine::updateObjects(float elapsedTime) {
 		}
 		gameObjects.camera->position = new_position;
 	
-		controlBorders(gameObjects.camera);
-		computeCameraPosition(gameState);
+		camHandler.controlBorders(gameObjects.camera);
+		camHandler.computeCameraPosition(gameState);
 	}
 	// update explosion
 	std::list <Explosion*>::iterator it;
@@ -350,17 +343,17 @@ void gameEngine::screenHandler::timerCallback(int) {
 	// call appropriate actions according to the currently pressed keys in key map
 	// (combinations of keys are supported but not used in this implementation)
 	if (gameState.keyMap[KEY_RIGHT_ARROW] == true ) {
-		turnCameraRight(gameObjects.camera, CAMERA_VIEW_ANGLE_DELTA);
+		camHandler.turnCameraRight(gameObjects.camera, CAMERA_VIEW_ANGLE_DELTA);
 	}
 	if (gameState.keyMap[KEY_LEFT_ARROW] == true ) {
-		turnCameraLeft(gameObjects.camera, CAMERA_VIEW_ANGLE_DELTA);
+		camHandler.turnCameraLeft(gameObjects.camera, CAMERA_VIEW_ANGLE_DELTA);
 	}
 	if (gameState.keyMap[KEY_UP_ARROW] == true && gameState.freeCameraMode && onPositionFree) {
-		increaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
+		camHandler.increaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
 
 	}
 	if (gameState.keyMap[KEY_DOWN_ARROW] == true && gameState.freeCameraMode && onPositionFree) {
-		decreaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
+		camHandler.decreaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
 
 	}
 	if (gameState.drawBanner == true ) {
@@ -396,7 +389,7 @@ void gameEngine::screenHandler::passiveMouseMotionCallback(int mouseX, int mouse
 		if (mouseX != gameState.windowWidth / 2) {
 
 			float cameraElevationAngleDelta = 0.5f * (mouseX - gameState.windowWidth / 2);
-			turnCamera(gameObjects.camera, -cameraElevationAngleDelta);
+			camHandler.turnCamera(gameObjects.camera, -cameraElevationAngleDelta);
 
 			glutWarpPointer(gameState.windowWidth / 2, gameState.windowHeight / 2);
 
@@ -462,7 +455,7 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 		break;
 	case 'p': // change between static positions
 		if (!gameState.curveMotion) {
-			changePosition(&cameraPosition);
+			camHandler.changePosition(&cameraPosition);
 			changingPosition = true;
 		}
 		break;
@@ -481,7 +474,7 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 			freeCamPos = gameObjects.camera->position;
 		}
 		break;
-	case 's': // turn camera reflektor
+	case ' ': // turn camera reflektor
 		if (gameState.freeCameraMode)
 			gameUniVars.spotLight = !gameUniVars.spotLight;
 		break;
@@ -495,18 +488,6 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 		if (!gameState.freeCameraMode) {
 			gameState.drawBanner = true;
 		}
-		break;
-	default:
-		;
-	}
-}
-
-//if key is released
-void gameEngine::keyBoardHandler::keyboardUpCallback(unsigned char keyReleased, int mouseX, int mouseY) {
-
-	switch (keyReleased) {
-	case ' ':
-		gameState.keyMap[KEY_SPACE] = false;
 		break;
 	default:
 		;
@@ -568,13 +549,13 @@ void gameEngine::gameMenu(int choice) {
 	case 0:
 		//changing position
 		gameState.freeCameraMode = false;
-		changePosition(&cameraPosition);
+		camHandler.changePosition(&cameraPosition);
 		changingPosition = true;
 		break;
 	case 1:
 		//changing position
 		gameState.freeCameraMode = false;
-		changePosition(&cameraPosition);
+		camHandler.changePosition(&cameraPosition);
 		changingPosition = true;
 		break;
 	case 2:
@@ -634,12 +615,11 @@ void gameEngine::createMenu(void) {
 // Called after the window and OpenGL are initialized. Called exactly once, before the main loop.
 void gameEngine::initializeApplication() {
 
-	glutDisplayFunc(displayCallback);
+	glutDisplayFunc(m_screenHandler.displayCallback);
 	// register callback for change of window size
-	glutReshapeFunc(reshapeCallback);
+	glutReshapeFunc(m_screenHandler.reshapeCallback);
 	// register callbacks for keyboard
 	glutKeyboardFunc(m_keyBoardHandler.keyboardCallback);     // key pressed
-	glutKeyboardUpFunc(m_keyBoardHandler.keyboardUpCallback);
 	glutSpecialFunc(m_keyBoardHandler.specialKeyboardCallback);     // special key pressed
 	glutSpecialUpFunc(m_keyBoardHandler.specialKeyboardUpCallback); // key released
 
@@ -672,7 +652,7 @@ void gameEngine::initializeApplication() {
 
 
 // Clean all structures
-void finalizeApplication() {
+void gameEngine::finalizeApplication() {
 
 	delete gameObjects.camera;
 	gameObjects.camera = NULL;
@@ -708,7 +688,7 @@ int main(int argc, char** argv) {
 	gameHandler->initializeApplication();
 
 #ifndef __APPLE__
-	glutCloseFunc(finalizeApplication);
+	glutCloseFunc(gameHandler->finalizeApplication);
 #else
 	glutWMCloseFunc(finalizeApplication);
 #endif

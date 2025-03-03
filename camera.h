@@ -14,14 +14,27 @@
 #include "pgr.h"
 #include "render_stuff.h"
 
-glm::vec3 computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, glm::vec3* cameraUpVector);
-void computeCameraPosition(GameState gameState);
-void changePosition(bool* cameraPosition);
-void increaseCameraSpeed(Camera* camera, float deltaSpeed);
-void decreaseCameraSpeed(Camera* camera, float deltaSpeed);
-void turnCameraLeft(Camera* camera, float deltaAngle);
-void turnCameraRight(Camera* camera, float deltaAngle);
-void turnCamera(Camera* camera, float deltaAngle);
-void controlBorders(Camera* camera);
+// booleans
+extern bool onPositionStatic;
+extern bool onPositionFree;
+extern bool changingPosition;
+extern float teleportSpeed;
+extern bool firstTime;
+extern GameState gameState;
+
+class cameraHandler {
+public:
+	cameraHandler() = default;
+	glm::vec3 computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, glm::vec3* cameraUpVector);
+	void computeCameraPosition(GameState gameState);
+	void changePosition(bool* cameraPosition);
+	void increaseCameraSpeed(Camera* camera, float deltaSpeed);
+	void decreaseCameraSpeed(Camera* camera, float deltaSpeed);
+	void turnCameraLeft(Camera* camera, float deltaAngle);
+	void turnCameraRight(Camera* camera, float deltaAngle);
+	void turnCamera(Camera* camera, float deltaAngle);
+	void controlBorders(Camera* camera);
+	bool vectorDif(glm::vec3 t, glm::vec3 b);
+};
 
 #endif 
