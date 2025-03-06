@@ -84,6 +84,7 @@ private:
     screenHandler m_screenHandler;
     keyBoardHandler m_keyBoardHandler;
     static cameraHandler camHandler;
+    static renderObjects renderHandler;
 };
 
 #endif 

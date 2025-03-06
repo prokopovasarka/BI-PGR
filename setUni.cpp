@@ -11,7 +11,7 @@
 #include "setUni.h"
 
 // function to set material uniforms
-void setMaterialUniforms(const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, GLuint texture, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni) {
+void setUniforms::setMaterialUniforms(const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, GLuint texture, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni) {
 
 	glUniform3fv(shaderProgram.diffuseLocation, 1, glm::value_ptr(diffuse));  // 2nd parameter must be 1 - it declares number of vectors in the vector array
 	glUniform3fv(shaderProgram.ambientLocation, 1, glm::value_ptr(ambient));
@@ -38,7 +38,7 @@ void setMaterialUniforms(const glm::vec3& ambient, const glm::vec3& diffuse, con
 }
 
 // function to set transform uniforms
-void setTransformUniforms(const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram) {
+void setUniforms::setTransformUniforms(const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram) {
 
 	glm::mat4 PVM = projectionMatrix * viewMatrix * modelMatrix;
 	glUniformMatrix4fv(shaderProgram.PVMmatrixLocation, 1, GL_FALSE, glm::value_ptr(PVM));

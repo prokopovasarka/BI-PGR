@@ -26,6 +26,7 @@
     <ClInclude Include="render_stuff.h" />
     <ClInclude Include="setUni.h" />
     <ClInclude Include="spline.h" />
+    <ClInclude Include="utilStructures.h" />
     <ClInclude Include="water.h" />
   </ItemGroup>
   <ItemGroup>

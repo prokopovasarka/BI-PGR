@@ -12,15 +12,9 @@
 #include <string>
 #include "pgr.h"
 #include "render_stuff.h"
-#include "data.h"
-#include "setUni.h"
-#include "spline.h"
-#include "water.h"
-#include "model.h"
 
-
-GLint SQUARES_AMOUNT = 400;  // amount of squares
-GLfloat  waterVertices[SQUARE_SIZE * 400]; // array for terrain
+GLint SQUARES_AMOUNT = 500;  // amount of squares
+GLfloat  waterVertices[SQUARE_SIZE * 500]; // array for terrain
 
 // set object geometry to NULL
 MeshGeometry* towerGeometry = NULL;
@@ -82,9 +76,10 @@ GameState gameState;
 //booleans
 bool fog = false;
 
+setUniforms renderObjects::uniSetter;
 
 //---------------------------------------------------LOAD MESHES-----------------------------------------------------------------------------
-bool loadSingleMesh(const std::string& fileName, SCommonShaderProgram& shader, MeshGeometry** geometry) {
+bool renderObjects::initHandler::loadSingleMesh(const std::string& fileName, SCommonShaderProgram& shader, MeshGeometry** geometry) {
 	std::cout << "loading model: " << fileName << "\n";
 	Assimp::Importer importer;
 
@@ -246,7 +241,7 @@ bool loadSingleMesh(const std::string& fileName, SCommonShaderProgram& shader, M
 	return true;
 }
 
-bool loadMesh(const std::string& fileName, SCommonShaderProgram& shader, std::vector<MeshGeometry*>* geometryFull) {
+bool renderObjects::initHandler::loadMesh(const std::string& fileName, SCommonShaderProgram& shader, std::vector<MeshGeometry*>* geometryFull) {
 	std::cout << "loading model: " << fileName << "\n";
 	Assimp::Importer importer;
 
@@ -405,7 +400,7 @@ bool loadMesh(const std::string& fileName, SCommonShaderProgram& shader, std::ve
 }
 
 //------------------------------------------------------------DRAW SKYBOX------------------------------------------------------------------------------
-void drawSkybox(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, skyboxFarPlaneShaderProgram& skyboxShader, MeshGeometry** geometry, GameUniformVariables gameUni) {
+void renderObjects::drawHandler::drawSkybox(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, skyboxFarPlaneShaderProgram& skyboxShader, MeshGeometry** geometry, GameUniformVariables gameUni) {
 	glm::vec4 fogColor = FOG_COLOR;
 	fog = false;
 	glUseProgram(skyboxShader.program);
@@ -429,7 +424,7 @@ void drawSkybox(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, 
 }
 
 // initialize skybox geometry
-void initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry** geometry) {
+void renderObjects::initHandler::initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry** geometry) {
 
 	*geometry = new MeshGeometry;
 
@@ -483,7 +478,7 @@ void initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry*
 }
 
 // initialize model VAO VBO
-void initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry) {
+void renderObjects::initHandler::initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry) {
 
 	*geometry = new MeshGeometry;
 
@@ -520,7 +515,7 @@ void initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry)
 }
 
 // initialize all shaders
-void initializeShaderPrograms(void) {
+void renderObjects::initHandler::initializeShaderPrograms() {
 
 	std::vector<GLuint> shaderList;
 
@@ -655,7 +650,7 @@ void initializeShaderPrograms(void) {
 }
 
 // initialize materials
-void initMaterial(MeshGeometry** geometry, Material material) {
+void renderObjects::initHandler::initMaterial(MeshGeometry** geometry, Material material) {
 	(*geometry)->ambient = material.ambient;
 	(*geometry)->diffuse = material.diffuse;
 	(*geometry)->specular = material.specular;
@@ -664,7 +659,7 @@ void initMaterial(MeshGeometry** geometry, Material material) {
 }
 
 // initialize water
-void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry) {
+void renderObjects::initHandler::initWater(SCommonShaderProgram& shader, MeshGeometry** geometry) {
 	generateWater(waterVertices);
 
 	*geometry = new MeshGeometry;
@@ -693,7 +688,7 @@ void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry) {
 }
 
 // initialize explosion
-void initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geometry) {
+void renderObjects::initHandler::initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geometry) {
 
 	*geometry = new MeshGeometry;
 
@@ -718,7 +713,7 @@ void initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geome
 }
 
 // initialize all models
-void initializeModels() {
+void renderObjects::initHandler::initializeModels() {
 	initSkyboxGeometry(skyboxShader, &skyboxGeometry);
 	initWater(waterShader, &waterGeometry);
 	initExplosion(explosionShader, &explosionGeometry);
@@ -759,7 +754,7 @@ void initializeModels() {
 }
 
 // initialize banner geometry
-void initBannerGeometry(GLuint shader, MeshGeometry** geometry) {
+void renderObjects::initHandler::initBannerGeometry(GLuint shader, MeshGeometry** geometry) {
 	*geometry = new MeshGeometry;
 
 	(*geometry)->texture = pgr::createTexture(BANNER_TEXTURE_PATH);
@@ -789,7 +784,7 @@ void initBannerGeometry(GLuint shader, MeshGeometry** geometry) {
 //--------------------------------------------------------------------------------TEXTURES--------------------------------------------------------
 
 // draw water
-void drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni) {
+void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni) {
 
 	glUseProgram(shaderProgram.program);
 	// enable blend for tranparent object
@@ -798,10 +793,10 @@ void drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, S
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1, 1, 1));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glUniform1f(shaderProgram.timeLocation, gameState.elapsedTime);
 
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -818,7 +813,7 @@ void drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, S
 }
 
 // draws banner with credits
-void drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void renderObjects::drawHandler::drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -853,7 +848,7 @@ void drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& pr
 //--------------------------------------------------------------------------------MODELS----------------------------------------------------------
 
 // draw single object
-void drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, ObjectProp param) {
+void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, ObjectProp param) {
 	glUseProgram(shaderProgram.program);
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 
@@ -866,11 +861,11 @@ void drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, 
 	}
 
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * param.size);
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 
 	for (int i = 0; i < (*geometry).size(); i++) {
 
-		setMaterialUniforms(
+		uniSetter.setMaterialUniforms(
 			(*geometry)[i]->ambient,
 			(*geometry)[i]->diffuse,
 			(*geometry)[i]->specular,
@@ -887,11 +882,11 @@ void drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, 
 }
 
 // draw platform model
-void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix) {
+void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix) {
 	//data texture
 	platformGeometry->texture = platformTexture;
 	glUseProgram(shaderProgram.program);
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -910,7 +905,7 @@ void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommon
 		modelMatrix = glm::rotate(modelMatrix, platformProps.angle, platformProps.front);
 	}
 
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 
 	//glBindTexture(GL_TEXTURE_CUBE_MAP, siloGeometry->texture);
 	glBindVertexArray(platformGeometry->vertexArrayObject);
@@ -923,9 +918,9 @@ void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommon
 }
 
 // draw cube model
-void drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 cubePosition) {
+void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 cubePosition) {
 	glUseProgram(shaderProgram.program);
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -937,7 +932,7 @@ void drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SC
 	modelMatrix = alignObject(cubePosition, glm::vec3(0.4, 1.0, 0.0), glm::vec3(0.0f, 0.5f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2, 0.2, 0.2));
 	modelMatrix = glm::rotate(modelMatrix, 8.0f, glm::vec3(1.0, 0.0, 0.0));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	//set material uniforms with two textures
 	glUniform3fv(shaderProgram.diffuseLocation, 1, glm::value_ptr(cubeGeometry->diffuse));
 	glUniform3fv(shaderProgram.ambientLocation, 1, glm::value_ptr(cubeGeometry->ambient));
@@ -969,9 +964,9 @@ void drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SC
 }
 
 // draws tower model
-void drawTower(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 towerPosition) {
+void renderObjects::drawHandler::drawTower(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 towerPosition) {
 	glUseProgram(shaderProgram.program);
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -982,7 +977,7 @@ void drawTower(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, S
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(towerPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.5, 1.5, 1.5));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, (*geometry)->numTriangles * 3, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -991,9 +986,9 @@ void drawTower(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, S
 }
 
 // draw sphere model
-void drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 spherePosition) {
+void renderObjects::drawHandler::drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 spherePosition) {
 	glUseProgram(shaderProgram.program);
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -1004,7 +999,7 @@ void drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, 
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(spherePosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.7, 0.7, 0.7));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, (*geometry)->numTriangles * 3, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -1013,9 +1008,9 @@ void drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, 
 }
 
 // draw house model
-void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition) {
+void renderObjects::drawHandler::drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition) {
 	glUseProgram(shaderProgram.program);
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -1028,7 +1023,7 @@ void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, S
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.7, 0.7, 0.7));
 	modelMatrix = glm::rotate(modelMatrix, 4.7f, glm::vec3(1.0, 0.0, 0.0));
 	modelMatrix = glm::rotate(modelMatrix, 4.7f, glm::vec3(0.0, 0.0, 1.0));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, (*geometry)->numTriangles * 3, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -1037,9 +1032,9 @@ void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, S
 }
 
 // draw plateau model
-void drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 plateauPosition) {
+void renderObjects::drawHandler::drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 plateauPosition) {
 	glUseProgram(shaderProgram.program);
-	setMaterialUniforms(
+	uniSetter.setMaterialUniforms(
 		(*geometry)->ambient,
 		(*geometry)->diffuse,
 		(*geometry)->specular,
@@ -1050,7 +1045,7 @@ void drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(plateauPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, (*geometry)->numTriangles * 3, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
@@ -1059,17 +1054,17 @@ void drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
 }
 
 // draw corpse method for animation
-void drawCorpseMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, Object* corpse) {
+void renderObjects::drawHandler::drawCorpseMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, Object* corpse) {
 	glUseProgram(shaderProgram.program);
 
 	glm::mat4 modelMatrix = alignObject(corpse->position,
 		corpse->direction, glm::vec3(0.0f, 0.0f, 1.0f));
 
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0));
-	setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	for (int i = 0; i < (*geometry).size(); i++) {
 
-		setMaterialUniforms(
+		uniSetter.setMaterialUniforms(
 			(*geometry)[i]->ambient,
 			(*geometry)[i]->diffuse,
 			(*geometry)[i]->specular,
@@ -1084,12 +1079,12 @@ void drawCorpseMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatri
 }
 
 // draw corpse
-void drawCorpse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Object* corpse) {
+void renderObjects::drawHandler::drawCorpse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Object* corpse) {
 	drawCorpseMet(viewMatrix, projectionMatrix, shaderProgram, &corpseGeometry, gameUniVars, corpse);
 }
 
 // draw explosion method for animation
-void drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry) {
+void renderObjects::drawHandler::drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry) {
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1124,12 +1119,12 @@ void drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMa
 }
 
 // draw explosion
-void drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion) {
+void renderObjects::drawHandler::drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion) {
 	drawExplosionMet(viewMatrix, projectionMatrix, explosionShader, explosion, &explosionGeometry);
 }
 
 // draw all models and animations
-void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
 	glEnable(GL_STENCIL_TEST);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	//glStencilFunc(GL_ALWAYS, 0, -1);
@@ -1154,7 +1149,7 @@ void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatr
 
 //--------------------------------------------------------------------------------CLEANING--------------------------------------------------------
 // clean shaders
-void cleanupShaderPrograms(void) {
+void renderObjects::cleanupShaderPrograms(void) {
 
 	pgr::deleteProgramAndShaders(shaderProgram.program);
 	pgr::deleteProgramAndShaders(skyboxShader.program);
@@ -1177,7 +1172,7 @@ void cleanupGeometry(MeshGeometry* geometry) {
 }
 
 // clean model's geometry
-void cleanupModels() {
+void renderObjects::cleanupModels() {
 	cleanupGeometry(towerGeometry);
 	cleanupGeometry(skyboxGeometry);
 	cleanupGeometry(waterGeometry);

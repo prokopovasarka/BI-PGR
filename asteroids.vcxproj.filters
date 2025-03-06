@@ -63,6 +63,9 @@
     <ClInclude Include="gameEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="utilStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="skybox.frag">

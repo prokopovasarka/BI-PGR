@@ -22,6 +22,7 @@
 
 gameEngine* gameHandler = new gameEngine();
 cameraHandler gameEngine::camHandler;
+renderObjects gameEngine::renderHandler;
 
 Object* corpseObj; //init corpse object
 bool corpseAnimation; //if animation is on or off
@@ -206,7 +207,7 @@ void gameEngine::screenHandler::drawWindowContents() {
 		);
 	}
 
-	projectionMatrix = glm::perspective(glm::radians(60.0f), gameState.windowWidth / (float)gameState.windowHeight, 0.1f, 10.0f);
+	projectionMatrix = glm::perspective(glm::radians(60.0f), (float)gameState.windowWidth / (float)gameState.windowHeight, 0.1f, 10.0f);
 
 	glUseProgram(shaderProgram.program);
 	glUniform1f(shaderProgram.timeLocation, gameState.elapsedTime);
@@ -215,8 +216,8 @@ void gameEngine::screenHandler::drawWindowContents() {
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 2, -1);
 
-	drawCorpse(viewMatrix, projectionMatrix, corpseObj); // draw corpse, v=2
-	drawEverything(viewMatrix, projectionMatrix); // draw almost all meshes
+	renderHandler.getDrawHandler().drawCorpse(viewMatrix, projectionMatrix, corpseObj); // draw corpse, v=2
+	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix); // draw almost all meshes
 
 	if (gameState.drawBanner) {
 		if (gameObjects.banner == NULL) {
@@ -224,7 +225,7 @@ void gameEngine::screenHandler::drawWindowContents() {
 		}
 		else {
 			if (!gameState.freeCameraMode) {
-				drawBanner(gameObjects.banner, orthoViewMatrix, orthoProjectionMatrix);
+				renderHandler.getDrawHandler().drawBanner(gameObjects.banner, orthoViewMatrix, orthoProjectionMatrix);
 			}
 			else {
 				gameState.drawBanner = false;
@@ -243,7 +244,7 @@ void gameEngine::screenHandler::drawWindowContents() {
 	std::list <Explosion*> ::iterator it;
 	for (int i = 0; i < 4; i++) {
 		for (it = explosions.begin(); it != explosions.end(); ++it) {
-			drawExplosion(viewMatrix, projectionMatrix, *it);
+			renderHandler.getDrawHandler().drawExplosion(viewMatrix, projectionMatrix, *it);
 		};
 	};
 
@@ -638,9 +639,9 @@ void gameEngine::initializeApplication() {
 	gameUniVars.isFog = false;
 	gameState.curveMotion = false;
 	// initialize shaders
-	initializeShaderPrograms();
+	renderHandler.getInitHandler().initializeShaderPrograms();
 	// create geometry for all models used
-	initializeModels();
+	renderHandler.getInitHandler().initializeModels();
 	glutMouseFunc(m_screenHandler.mouseCallback);
 	gameObjects.camera = NULL;
 	gameObjects.banner = NULL;
@@ -661,8 +662,8 @@ void gameEngine::finalizeApplication() {
 		gameObjects.banner = NULL;
 	}
 	delete gameHandler;
-	cleanupModels();
-	cleanupShaderPrograms();
+	renderHandler.cleanupModels();
+	renderHandler.cleanupShaderPrograms();
 }
 
 // init application
