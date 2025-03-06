@@ -15,7 +15,7 @@
 class setUniforms {
 public:
 	setUniforms() = default;
-	void setMaterialUniforms(const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, GLuint texture, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni);
+	void setMaterialUniforms( MeshGeometry* geometry, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni);
 	void setTransformUniforms(const glm::mat4& modelMatrix, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram);
 };
 

@@ -11,12 +11,12 @@
 #include "setUni.h"
 
 // function to set material uniforms
-void setUniforms::setMaterialUniforms(const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular, float shininess, GLuint texture, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni) {
+void setUniforms::setMaterialUniforms( MeshGeometry* geometry, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni) {
 
-	glUniform3fv(shaderProgram.diffuseLocation, 1, glm::value_ptr(diffuse));  // 2nd parameter must be 1 - it declares number of vectors in the vector array
-	glUniform3fv(shaderProgram.ambientLocation, 1, glm::value_ptr(ambient));
-	glUniform3fv(shaderProgram.specularLocation, 1, glm::value_ptr(specular));
-	glUniform1f(shaderProgram.shininessLocation, shininess);
+	glUniform3fv(shaderProgram.diffuseLocation, 1, glm::value_ptr(geometry->diffuse));  // 2nd parameter must be 1 - it declares number of vectors in the vector array
+	glUniform3fv(shaderProgram.ambientLocation, 1, glm::value_ptr(geometry->ambient));
+	glUniform3fv(shaderProgram.specularLocation, 1, glm::value_ptr(geometry->specular));
+	glUniform1f(shaderProgram.shininessLocation, geometry->shininess);
 	glUniform1i(shaderProgram.isFogLocation, gameUni.isFog);
 	glUniform1i(shaderProgram.spotLightLocation, gameUni.spotLight);
 	glUniform1f(shaderProgram.pointLightIntensityLocation, gameUni.pointLightIntensity);
@@ -25,11 +25,11 @@ void setUniforms::setMaterialUniforms(const glm::vec3& ambient, const glm::vec3&
 	glUniform3fv(shaderProgram.reflectorPositionLocation, 1, glm::value_ptr(gameUni.reflectorPositionLocation));
 	glUniform3fv(shaderProgram.reflectorDirectionLocation, 1, glm::value_ptr(gameUni.reflectorDirectionLocation));
 
-	if (texture != 0) {
+	if (geometry->texture != 0) {
 		glUniform1i(shaderProgram.useTextureLocation, 1);
 		glUniform1i(shaderProgram.texSamplerLocation, 0);
 		glActiveTexture(GL_TEXTURE0 + 0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, geometry->texture);
 	}
 	else {
 		glUniform1i(shaderProgram.useTextureLocation, 0);

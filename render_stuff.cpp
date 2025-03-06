@@ -796,13 +796,7 @@ void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const gl
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glUniform1f(shaderProgram.timeLocation, gameState.elapsedTime);
 
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glBindVertexArray((*geometry)->vertexArrayObject);
 	glDrawArrays(GL_TRIANGLES, 0, 3 * (*geometry)->numTriangles);
@@ -865,13 +859,7 @@ void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const g
 
 	for (int i = 0; i < (*geometry).size(); i++) {
 
-		uniSetter.setMaterialUniforms(
-			(*geometry)[i]->ambient,
-			(*geometry)[i]->diffuse,
-			(*geometry)[i]->specular,
-			(*geometry)[i]->shininess,
-			(*geometry)[i]->texture,
-			shaderProgram, gameUni);
+		uniSetter.setMaterialUniforms((*geometry)[i], shaderProgram, gameUni );
 
 		glBindVertexArray((*geometry)[i]->vertexArrayObject);
 		glDrawElements(GL_TRIANGLES, (*geometry)[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
@@ -886,13 +874,7 @@ void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const gl
 	//data texture
 	platformGeometry->texture = platformTexture;
 	glUseProgram(shaderProgram.program);
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * platformProps.size);
@@ -920,13 +902,7 @@ void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const gl
 // draw cube model
 void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 cubePosition) {
 	glUseProgram(shaderProgram.program);
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms(*geometry, shaderProgram, gameUni);
 
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(cubePosition, glm::vec3(0.4, 1.0, 0.0), glm::vec3(0.0f, 0.5f, 1.0f));
@@ -966,13 +942,7 @@ void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm
 // draws tower model
 void renderObjects::drawHandler::drawTower(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 towerPosition) {
 	glUseProgram(shaderProgram.program);
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(towerPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -988,13 +958,7 @@ void renderObjects::drawHandler::drawTower(const glm::mat4& viewMatrix, const gl
 // draw sphere model
 void renderObjects::drawHandler::drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 spherePosition) {
 	glUseProgram(shaderProgram.program);
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(spherePosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -1010,13 +974,7 @@ void renderObjects::drawHandler::drawSphere(const glm::mat4& viewMatrix, const g
 // draw house model
 void renderObjects::drawHandler::drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition) {
 	glUseProgram(shaderProgram.program);
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(housePosition, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -1034,13 +992,7 @@ void renderObjects::drawHandler::drawHouse(const glm::mat4& viewMatrix, const gl
 // draw plateau model
 void renderObjects::drawHandler::drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 plateauPosition) {
 	glUseProgram(shaderProgram.program);
-	uniSetter.setMaterialUniforms(
-		(*geometry)->ambient,
-		(*geometry)->diffuse,
-		(*geometry)->specular,
-		(*geometry)->shininess,
-		(*geometry)->texture,
-		shaderProgram, gameUni);
+	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
 	modelMatrix = alignObject(plateauPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -1064,13 +1016,7 @@ void renderObjects::drawHandler::drawCorpseMet(const glm::mat4& viewMatrix, cons
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	for (int i = 0; i < (*geometry).size(); i++) {
 
-		uniSetter.setMaterialUniforms(
-			(*geometry)[i]->ambient,
-			(*geometry)[i]->diffuse,
-			(*geometry)[i]->specular,
-			(*geometry)[i]->shininess,
-			(*geometry)[i]->texture,
-			shaderProgram, gameUni);
+		uniSetter.setMaterialUniforms((*geometry)[i], shaderProgram, gameUni );
 		glBindVertexArray((*geometry)[i]->vertexArrayObject);
 		glDrawElements(GL_TRIANGLES, (*geometry)[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
 	}

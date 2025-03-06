@@ -16,8 +16,6 @@
 #include "water.h"
 #include "model.h"
 
-
-
 class renderObjects {
 public:
 	renderObjects() {
