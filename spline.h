@@ -12,20 +12,25 @@
 
 #include "pgr.h" 
 
-bool vectorLen(const glm::vec3& vect);
+class splineHandler {
+public:
+	static bool vectorLen(const glm::vec3& vect);
 
-glm::mat4 alignObject(const glm::vec3& position, const glm::vec3& front, const glm::vec3& up);
+	static glm::mat4 alignObject(const glm::vec3& position, const glm::vec3& front, const glm::vec3& up);
+	glm::vec3 evalCurveSegFirstDev(const glm::vec3 points[], const float t);
+	glm::vec3 evaluateCurveSegment(const glm::vec3 points[], const float t);
 
-glm::vec3 evaluateClosedCurve(
-	const glm::vec3 points[],
-	const size_t    count,
-	const float     t
-);
+	glm::vec3 evaluateClosedCurve(
+		const glm::vec3 points[],
+		const size_t    count,
+		const float     t
+	);
 
-glm::vec3 evalClosedCurveFirstDev(
-	const glm::vec3 points[],
-	const size_t    count,
-	const float     t
-);
+	glm::vec3 evalClosedCurveFirstDev(
+		const glm::vec3 points[],
+		const size_t    count,
+		const float     t
+	);
 
+};
 #endif

@@ -11,12 +11,12 @@
 #include <iostream>
 
 // length of vector check
-bool vectorLen(const glm::vec3& vect) {
+bool splineHandler::vectorLen(const glm::vec3& vect) {
     return !vect.x && !vect.y && !vect.z;
 }
 
 // align current coordinate system
-glm::mat4 alignObject(const glm::vec3& position, const glm::vec3& front, const glm::vec3& up) {
+glm::mat4 splineHandler::alignObject(const glm::vec3& position, const glm::vec3& front, const glm::vec3& up) {
 
     glm::vec3 z = -glm::normalize(front);
 
@@ -40,7 +40,7 @@ glm::mat4 alignObject(const glm::vec3& position, const glm::vec3& front, const g
 }
 
 // evalucate one segment of the curve
-glm::vec3 evaluateCurveSegment(const glm::vec3 points[], const float t) {
+glm::vec3 splineHandler::evaluateCurveSegment(const glm::vec3 points[], const float t) {
 
 	float t2 = t * t;
 	float t3 = t2 * t;
@@ -62,7 +62,7 @@ glm::vec3 evaluateCurveSegment(const glm::vec3 points[], const float t) {
 }
 
 // evaluate first derivative of one segment
-glm::vec3 evalCurveSegFirstDev(const glm::vec3 points[], const float t) {
+glm::vec3 splineHandler::evalCurveSegFirstDev(const glm::vec3 points[], const float t) {
 	float t2 = t * t;
 	glm::vec4 ts(3 * t2, 2 * t, 1, 0);
 	glm::mat4 values(
@@ -82,7 +82,7 @@ glm::vec3 evalCurveSegFirstDev(const glm::vec3 points[], const float t) {
 }
 
 // evaluate all parts of the curve
-glm::vec3 evaluateClosedCurve(const glm::vec3 points[], const size_t count, const float t) {
+glm::vec3 splineHandler::evaluateClosedCurve(const glm::vec3 points[], const size_t count, const float t) {
 	glm::vec3 result(0.0, 0.0, 0.0);
 
 	int i = (int)t;
@@ -102,7 +102,7 @@ glm::vec3 evaluateClosedCurve(const glm::vec3 points[], const size_t count, cons
 }
 
  // evaluate first derivate of the whole curve
-glm::vec3 evalClosedCurveFirstDev(const glm::vec3 points[], const size_t count, const float t) {
+glm::vec3 splineHandler::evalClosedCurveFirstDev(const glm::vec3 points[], const size_t count, const float t) {
 	int i = (int)t;
 	glm::vec3 newPoints[4];
 	newPoints[0] = points[(i - 1 + count) % count];

@@ -847,7 +847,7 @@ void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const g
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 
 	if (param.align) {
-		modelMatrix = alignObject(param.position, param.front, param.up);
+		modelMatrix = splineHandler::alignObject(param.position, param.front, param.up);
 	}
 	else {
 		modelMatrix = glm::translate(modelMatrix, param.position);
@@ -880,7 +880,7 @@ void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const gl
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * platformProps.size);
 
 	if (platformProps.align) {
-		modelMatrix = alignObject(platformProps.position, platformProps.front, platformProps.up);
+		modelMatrix = splineHandler::alignObject(platformProps.position, platformProps.front, platformProps.up);
 	}
 	else {
 		modelMatrix = glm::translate(modelMatrix, platformProps.position);
@@ -905,7 +905,7 @@ void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm
 	uniSetter.setMaterialUniforms(*geometry, shaderProgram, gameUni);
 
 	glm::mat4 modelMatrix;
-	modelMatrix = alignObject(cubePosition, glm::vec3(0.4, 1.0, 0.0), glm::vec3(0.0f, 0.5f, 1.0f));
+	modelMatrix = splineHandler::alignObject(cubePosition, glm::vec3(0.4, 1.0, 0.0), glm::vec3(0.0f, 0.5f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2, 0.2, 0.2));
 	modelMatrix = glm::rotate(modelMatrix, 8.0f, glm::vec3(1.0, 0.0, 0.0));
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
@@ -945,7 +945,7 @@ void renderObjects::drawHandler::drawTower(const glm::mat4& viewMatrix, const gl
 	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
-	modelMatrix = alignObject(towerPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = splineHandler::alignObject(towerPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.5, 1.5, 1.5));
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
@@ -961,7 +961,7 @@ void renderObjects::drawHandler::drawSphere(const glm::mat4& viewMatrix, const g
 	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
-	modelMatrix = alignObject(spherePosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = splineHandler::alignObject(spherePosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.7, 0.7, 0.7));
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
@@ -977,7 +977,7 @@ void renderObjects::drawHandler::drawHouse(const glm::mat4& viewMatrix, const gl
 	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
-	modelMatrix = alignObject(housePosition, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = splineHandler::alignObject(housePosition, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.7, 0.7, 0.7));
 	modelMatrix = glm::rotate(modelMatrix, 4.7f, glm::vec3(1.0, 0.0, 0.0));
 	modelMatrix = glm::rotate(modelMatrix, 4.7f, glm::vec3(0.0, 0.0, 1.0));
@@ -995,7 +995,7 @@ void renderObjects::drawHandler::drawPlateau(const glm::mat4& viewMatrix, const 
 	uniSetter.setMaterialUniforms( *geometry, shaderProgram, gameUni );
 
 	glm::mat4 modelMatrix;
-	modelMatrix = alignObject(plateauPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = splineHandler::alignObject(plateauPosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0));
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 	glBindVertexArray((*geometry)->vertexArrayObject);
@@ -1009,7 +1009,7 @@ void renderObjects::drawHandler::drawPlateau(const glm::mat4& viewMatrix, const 
 void renderObjects::drawHandler::drawCorpseMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, Object* corpse) {
 	glUseProgram(shaderProgram.program);
 
-	glm::mat4 modelMatrix = alignObject(corpse->position,
+	glm::mat4 modelMatrix = splineHandler::alignObject(corpse->position,
 		corpse->direction, glm::vec3(0.0f, 0.0f, 1.0f));
 
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0));

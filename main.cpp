@@ -21,8 +21,9 @@
 
 
 gameEngine* gameHandler = new gameEngine();
-cameraHandler gameEngine::camHandler;
 renderObjects gameEngine::renderHandler;
+cameraHandler gameEngine::camHandler;
+splineHandler gameEngine::splineFucHandler;
 
 Object* corpseObj; //init corpse object
 bool corpseAnimation; //if animation is on or off
@@ -84,8 +85,8 @@ void gameEngine::corpseHandler::updateCorpse(float  elapsedTime) {
 		corpseObj->startTime += elapsedTime;
 		float a = corpseObj->startTime;
 		a *= 0.6;
-		corpseObj->position = evaluateClosedCurve(corpseCurvePoints, corpseCurvePointsTotal, a);
-		corpseObj->direction = -glm::normalize(evalClosedCurveFirstDev(corpseCurvePoints, corpseCurvePointsTotal, a));
+		corpseObj->position = splineFucHandler.evaluateClosedCurve(corpseCurvePoints, corpseCurvePointsTotal, a);
+		corpseObj->direction = -glm::normalize(splineFucHandler.evalClosedCurveFirstDev(corpseCurvePoints, corpseCurvePointsTotal, a));
 	}
 }
 
@@ -125,7 +126,7 @@ void gameEngine::restartGame() {
 		gameObjects.camera = new Camera;
 	}
 
-	gameObjects.camera->position = glm::vec3(0.0f, 5.3f, 0.3f);
+	gameObjects.camera->position = glm::vec3(-0.0f, 5.3f, 1.3f);
 	gameObjects.camera->viewAngle = 90.0f; // degrees
 	gameObjects.camera->direction = glm::vec3(cos(glm::radians(gameObjects.camera->viewAngle)), sin(glm::radians(gameObjects.camera->viewAngle)), 0.0f);
 	gameObjects.camera->speed = 0.0f;
@@ -182,8 +183,7 @@ void gameEngine::screenHandler::drawWindowContents() {
 		camHandler.computeCenterView(gameObjects.camera, &gameUniVars, &cameraUpVector);
 		firstTime = false;
 	}
-	if (gameState.freeCameraMode && onPositionFree) {
-		onPositionStatic = false;
+	if (gameState.freeCameraMode) {
 		glm::vec3 cameraPosition = gameObjects.camera->position;
 		glm::vec3 cameraUpVector = glm::vec3(0.0f, 0.0f, 1.0f);
 		camHandler.controlBorders(gameObjects.camera);
@@ -296,8 +296,8 @@ void gameEngine::updateObjects(float elapsedTime) {
 		gameObjects.camera->startTime += timeDelta;
 		float a = gameObjects.camera->startTime;
 		a *= 0.6;
-		gameObjects.camera->position = evaluateClosedCurve(curveData, curveSize, a);
-		gameObjects.camera->direction = glm::normalize(evalClosedCurveFirstDev(curveData, curveSize, a));
+		gameObjects.camera->position = splineFucHandler.evaluateClosedCurve(curveData, curveSize, a);
+		gameObjects.camera->direction = glm::normalize(splineFucHandler.evalClosedCurveFirstDev(curveData, curveSize, a));
 	}
 	else {// normal camera static/free
 		glm::vec3 new_position = gameObjects.camera->position + timeDelta * gameObjects.camera->speed * gameObjects.camera->direction;
@@ -349,11 +349,11 @@ void gameEngine::screenHandler::timerCallback(int) {
 	if (gameState.keyMap[KEY_LEFT_ARROW] == true ) {
 		camHandler.turnCameraLeft(gameObjects.camera, CAMERA_VIEW_ANGLE_DELTA);
 	}
-	if (gameState.keyMap[KEY_UP_ARROW] == true && gameState.freeCameraMode && onPositionFree) {
+	if (gameState.keyMap[KEY_UP_ARROW] == true && gameState.freeCameraMode ) {
 		camHandler.increaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
 
 	}
-	if (gameState.keyMap[KEY_DOWN_ARROW] == true && gameState.freeCameraMode && onPositionFree) {
+	if (gameState.keyMap[KEY_DOWN_ARROW] == true && gameState.freeCameraMode ) {
 		camHandler.decreaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
 
 	}
@@ -449,7 +449,6 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 			else {
 				gameObjects.camera->speed = 0;
 				glutPassiveMotionFunc(NULL);
-				onPositionFree = false;
 				gameUniVars.spotLight = false;
 			}
 		}
@@ -457,7 +456,6 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 	case 'p': // change between static positions
 		if (!gameState.curveMotion) {
 			camHandler.changePosition(&cameraPosition);
-			changingPosition = true;
 		}
 		break;
 
@@ -465,7 +463,6 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 		gameState.curveMotion = !gameState.curveMotion;
 		if (!gameState.curveMotion) {
 			gameObjects.camera->speed = 0;
-			onPositionFree = false;
 			gameState.freeCameraMode = false;
 			gameObjects.camera->direction = freeCamDir;
 			gameObjects.camera->position = freeCamPos;
@@ -551,17 +548,14 @@ void gameEngine::gameMenu(int choice) {
 		//changing position
 		gameState.freeCameraMode = false;
 		camHandler.changePosition(&cameraPosition);
-		changingPosition = true;
 		break;
 	case 1:
 		//changing position
 		gameState.freeCameraMode = false;
 		camHandler.changePosition(&cameraPosition);
-		changingPosition = true;
 		break;
 	case 2:
 		//free camera mode
-		onPositionFree = true;
 		gameState.freeCameraMode = true;
 		if (gameState.freeCameraMode) {
 			glutPassiveMotionFunc(gameEngine::screenHandler::passiveMouseMotionCallback);

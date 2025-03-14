@@ -12,16 +12,16 @@
 
 // positions for static camera and their center 
 // first position
-glm::vec3 firstStatPosition = glm::vec3(1.0f, 4.0f, 0.5f);
+glm::vec3 firstStatPosition = glm::vec3(1.0f, 4.0f, 1.5f);
 glm::vec3 firstStatCenter = glm::vec3(0.0f, 2.0f, 2.0f);
 // second position
 glm::vec3 secStatPosition = glm::vec3(1.0f, 4.0f, 5.1f);
 glm::vec3 secStatCenter = glm::vec3(0.0f, -0.0f, -0.3f);
 // actual position in free mode
-glm::vec3 positionInFreeMode = glm::vec3(-0.0f, 0.0f, 0.1f);
-glm::vec3 centerInFreeMode = glm::vec3(0.0f, -1.0f, 0.0f);
-glm::vec3 actualPosInFreeMode = glm::vec3(-0.0f, 0.0f, 0.0f);
-glm::vec3 actualCenterInFreeMode = glm::vec3(-0.0f, 0.0f, 0.0f);
+glm::vec3 positionInFreeMode = glm::vec3(0.0f, 4.0f, 1.5f);
+glm::vec3 centerInFreeMode = glm::vec3(0.0f, 2.0f, 1.5f);
+glm::vec3 actualPosInFreeMode = glm::vec3(0.0f, 4.0f, 3.0f);
+glm::vec3 actualCenterInFreeMode = glm::vec3(0.0f, 4.0f, 3.0f);
 // what position is active
 glm::vec3 activeStaticPosition = firstStatPosition;
 glm::vec3 activeStaticCenter = firstStatCenter;
@@ -31,10 +31,7 @@ glm::vec3 actualCenter = firstStatCenter;
 
 // switch between two different static positions
 void cameraHandler::changePosition(bool* cameraPosition) {
-	if (*cameraPosition == 1)
-		*cameraPosition = 0;
-	else
-		*cameraPosition = 1;
+	*cameraPosition = !*cameraPosition;
 	switch (*cameraPosition) {
 	case 0:
 		activeStaticPosition = firstStatPosition;
@@ -46,14 +43,11 @@ void cameraHandler::changePosition(bool* cameraPosition) {
 		activeStaticCenter = secStatCenter;
 		break;
 	}
+
 }
 
 // computing center view
 glm::vec3  cameraHandler::computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, glm::vec3* cameraUpVector) {
-	if (!gameState.curveMotion) {
-		positionInFreeMode = camera->position;
-		actualPosInFreeMode = camera->position;
-	}
 	glm::vec3 cameraCenter;
 	glm::vec3 cameraViewDirection = camera->direction;
 
@@ -67,8 +61,6 @@ glm::vec3  cameraHandler::computeCenterView(Camera* camera, GameUniformVariables
 	gameUniVars->reflectorDirectionLocation = cameraViewDirection;
 
 	cameraCenter = camera->position + cameraViewDirection;
-	centerInFreeMode = cameraCenter;
-	actualCenterInFreeMode = cameraCenter;
 
 	return cameraCenter;
 }
@@ -86,50 +78,35 @@ bool cameraHandler::vectorDif(glm::vec3 t, glm::vec3 b) {
 }
 
 // compute teleport between positions
-void cameraHandler::computeCameraPosition(GameState gameState) {
+void cameraHandler::computeCameraPosition(GameState& gameState) {
 
-	if (!gameState.freeCameraMode && !onPositionStatic) {
-		actualPosition = activeStaticPosition;
-		actualCenter = mix(centerInFreeMode, activeStaticCenter, teleportSpeed);
-		positionInFreeMode = actualPosition;
-		centerInFreeMode = actualCenter;
-
-		if (vectorDif(actualPosition, activeStaticPosition) && vectorDif(actualCenter, activeStaticCenter))
-			onPositionStatic = true;
-	}
-
-	if (gameState.freeCameraMode && !onPositionFree) {
-
-		actualPosition = mix(actualPosition, actualPosInFreeMode, teleportSpeed);
-		actualCenter = mix(actualCenter, actualCenterInFreeMode, teleportSpeed);
-		if (vectorDif(actualPosition, actualPosInFreeMode) && vectorDif(actualCenter, actualCenterInFreeMode))
-			onPositionFree = true;
-	}
-
-	if (!gameState.freeCameraMode && changingPosition) {
+	if (!gameState.freeCameraMode) {
 		actualPosition = mix(actualPosition, activeStaticPosition, teleportSpeed);
 		actualCenter = mix(actualCenter, activeStaticCenter, teleportSpeed);
-		if (vectorDif(actualPosition, activeStaticPosition) && vectorDif(actualCenter, activeStaticCenter))
-			changingPosition = false;
+	
 	}
 
-	if (gameState.freeCameraMode && changingPosition) {
-		changingPosition = false;
-	}
 }
 
 // increase speed of movement
 void cameraHandler::increaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
 
+	if (camera->speed <= 0.1f)
+		deltaSpeed = 0.75f;
 	camera->speed =
 		std::min(camera->speed + deltaSpeed, CAMERA_SPEED_MAX);
+	
+	
 }
 
 // decrease speed of movement
 void cameraHandler::decreaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
 
+	if (abs(camera->speed) <= 0.2f)
+		deltaSpeed = 0.75f;
 	camera->speed =
-		std::max(camera->speed - deltaSpeed, 0.0f);
+		std::max(camera->speed - deltaSpeed, -CAMERA_SPEED_MAX);
+
 
 }
 

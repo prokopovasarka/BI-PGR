@@ -15,9 +15,6 @@
 #include "render_stuff.h"
 
 // booleans
-extern bool onPositionStatic;
-extern bool onPositionFree;
-extern bool changingPosition;
 extern float teleportSpeed;
 extern bool firstTime;
 extern GameState gameState;
@@ -26,7 +23,7 @@ class cameraHandler {
 public:
 	cameraHandler() = default;
 	glm::vec3 computeCenterView(Camera* camera, GameUniformVariables* gameUniVars, glm::vec3* cameraUpVector);
-	void computeCameraPosition(GameState gameState);
+	void computeCameraPosition(GameState& gameState);
 	void changePosition(bool* cameraPosition);
 	void increaseCameraSpeed(Camera* camera, float deltaSpeed);
 	void decreaseCameraSpeed(Camera* camera, float deltaSpeed);

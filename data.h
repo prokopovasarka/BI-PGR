@@ -20,7 +20,7 @@ enum { KEY_LEFT_ARROW, KEY_RIGHT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW, KEY_SPACE,
 
 #define CAMERA_VIEW_ANGLE_DELTA 2.0f // in degrees
 #define CAMERA_SPEED_INCREMENT  0.025f
-#define CAMERA_SPEED_MAX        0.8f
+#define CAMERA_SPEED_MAX        1.0f
 
 
 /// maximum angle to view with mouse 

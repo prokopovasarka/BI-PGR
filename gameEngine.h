@@ -11,9 +11,6 @@ extern GameState gameState;	      // scene variables
 extern ExplosionShaderProgram explosionShader; // explosion shader
 
 bool cameraPosition = false;
-bool onPositionStatic = false;
-bool onPositionFree = false;
-bool changingPosition = false;
 bool once = false;
 bool firstTime = true;
 extern glm::vec3 actualPosition;
@@ -85,6 +82,7 @@ private:
     keyBoardHandler m_keyBoardHandler;
     static cameraHandler camHandler;
     static renderObjects renderHandler;
+    static splineHandler splineFucHandler;
 };
 
 #endif 

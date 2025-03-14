@@ -126,7 +126,7 @@ typedef struct _gameState {
 	int windowWidth;    // set by reshape callback
 	int windowHeight;   // set by reshape callback
 
-	bool freeCameraMode;        // false;
+	bool freeCameraMode = false;        // false;
 	bool gameOver;              // false;
 	bool keyMap[KEYS_COUNT];
 	bool drawBanner = false;    // false

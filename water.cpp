@@ -67,15 +67,15 @@ void generateWater(GLfloat waterVertices[]) {
 	int index = 0;
 	for (int i = -3; i < 3; i += 1) {
 		for (int j = -3; j < 3; j += 1) {
-			createSquare(waterVertices, i, j, i + size, j + size, index, -0.01f);
+			createSquare(waterVertices, i, j, i + size, j + size, index, 0.5f);
 			index += SQUARE_SIZE;
 		}
 	}
 	// create 400-36 more squares
-	float z1 = -0.01f;
-	float z2 = -0.01f;
-	float newZ1 = -0.01;
-	float newZ2 = -0.01;
+	float z1 = 0.5f;
+	float z2 = 0.5f;
+	float newZ1 = 0.5;
+	float newZ2 = 0.5;
 
 	const int startX = -10;
 	const int endX = 10;
@@ -83,7 +83,7 @@ void generateWater(GLfloat waterVertices[]) {
 	const int endY = 10;
 	float zValues[endX - startX + 1];
 	for (int i = 0; i < endX - startX; i++) {
-		zValues[i] = -0.01f;
+		zValues[i] = 0.5f;
 	}
 	for (int j = endY; j > startY; j -= 1) {
 		for (int i = startX; i < endX; i += 1) {
@@ -92,37 +92,37 @@ void generateWater(GLfloat waterVertices[]) {
 				// conditions to fit the plain in the center
 				if (j == -4 && i < 3 && i > -4) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						-0.01f, -0.01f, newZ1, newZ2);
+						0.5f, 0.5f, newZ1, newZ2);
 				}
 				else if (j == 3 && i < 3 && i > -4) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						zValues[i - startX], zValues[i - startX + 1], -0.01f, -0.01f);
+						zValues[i - startX], zValues[i - startX + 1], 0.5f, 0.5f);
 
 				}
 				else if (i == 3 && j < 3 && j > -4) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						-0.01f, zValues[i - startX + 1], -0.01f, newZ2);
+						-0.01f, zValues[i - startX + 1], 0.5f, newZ2);
 				}
 				else if (i == -4 && j < 3 && j > -4) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						zValues[i - startX], -0.01f, newZ1, -0.01f);
+						zValues[i - startX], 0.5f, newZ1, 0.5f);
 				}
 				// corners needs to change only one value
 				else if (i == -4 && j == 3) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						zValues[i - startX], zValues[i - startX + 1], newZ1, -0.01f);
+						zValues[i - startX], zValues[i - startX + 1], newZ1, 0.5f);
 				}
 				else if (i == 3 && j == 3) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						zValues[i - startX], zValues[i - startX + 1], -0.01f, newZ2);
+						zValues[i - startX], zValues[i - startX + 1], 0.5f, newZ2);
 				}
 				else if (i == 3 && j == -4) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						-0.01f, zValues[i - startX + 1], newZ1, newZ2);
+						0.5f, zValues[i - startX + 1], newZ1, newZ2);
 				}
 				else if (i == -4 && j == -4) {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
-						zValues[i - startX], -0.01f, newZ1, newZ2);
+						zValues[i - startX], 0.5f, newZ1, newZ2);
 				}
 				else {
 					randomSquare(waterVertices, i, j, i + size, j + size, index,
@@ -131,7 +131,7 @@ void generateWater(GLfloat waterVertices[]) {
 
 				zValues[i - startX] = newZ1;
 				newZ1 = newZ2;
-				newZ2 = -0.01;
+				newZ2 = 0.5;
 				index += SQUARE_SIZE;
 			}
 		}
