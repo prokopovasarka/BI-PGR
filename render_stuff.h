@@ -33,12 +33,16 @@ public:
 		void initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry);
 		void initBannerGeometry(GLuint shader, MeshGeometry** geometry);
 		void initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry** geometry);
-		void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry);
+		void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry, waterBufferMaker* waterFBOHandler);
 		void initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geometry);
 
 		void initializeShaderPrograms();
 
-		void initializeModels();
+		void initializeModels(waterBufferMaker* waterFBOHandler);
+
+		GLuint platformTexture;
+		GLuint grassTexture;
+
 	};
 
 
@@ -83,6 +87,7 @@ private:
 	initHandler m_initHandler;
 	drawHandler m_drawHandler;
 	static setUniforms uniSetter;
+
 };
 
 #endif

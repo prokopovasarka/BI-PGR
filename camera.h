@@ -32,6 +32,8 @@ public:
 	void turnCamera(Camera* camera, float deltaAngle);
 	void controlBorders(Camera* camera);
 	bool vectorDif(glm::vec3 t, glm::vec3 b);
+	void cameraHandler::moveCamUp(Camera* camera, float distance);
+	void cameraHandler::moveCamDown(Camera* camera, float distance);
 };
 
 #endif 

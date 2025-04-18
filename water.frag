@@ -32,6 +32,11 @@ uniform mat4 normalMatrix;  // inverse transposed Mmatrix
 uniform vec3 reflectorPosition;   // reflector position (world coordinates)
 uniform vec3 reflectorDirection;  // reflector direction (world coordinates)
 
+//MAKING REFLECTION
+uniform sampler2D reflectionTexture;
+uniform sampler2D refractionTexture;
+uniform sampler2D dudvMapTexture;
+
 //----
 
 uniform bool isFog;                // to enable fog
@@ -43,6 +48,8 @@ smooth in vec2 texCoord_v;             // fragment texture coordinates
 smooth in vec3 vertexPosition;         // vertex position in world space
 smooth in vec3 vertexNormal;           // vertex normal
 in float mydistance;				   // distance from the start of the fog, to compute fog
+in vec4 clipSpace;
+
 
 out vec4       color_f;        // outgoing fragment color
 
@@ -113,14 +120,6 @@ vec4 pointLight(Light light, Material material, vec3 position, vec3 normal) {
 		return vec4(ret, 1.0);
 }
 
-// changing coordinates of water texture
-float changeCoordinates(){	
-		float res = texCoord_v.x;
-		float myTime = mod(time, 10);
-
-		return res + myTime/100;
-}
-
 
 //type
 Light sun;
@@ -146,31 +145,29 @@ void setUpRefl() {
 
 void main() {
 		setUpRefl();
-		// sun - directional light
 		sun.ambient = vec3(0.5f);
 		sun.diffuse = vec3(1.0, 0.5, 0.5f);
 		sun.specular = vec3(1.0);
-		// sun.position = (Vmatrix * vec4(-3.78, -3.83, 6.0, 1.0)).xyz;
 		sun.position = (Vmatrix * vec4(-100.0, -5.0, 100.0, 0.0)).xyz;
 
 		vec3 globalAmbientLight = vec3(0.1f);  // global light
 
-		color_f = vec4(material.ambient * globalAmbientLight, 0.0);
+		vec2 ndc = (clipSpace.xy/clipSpace.w)/2.0 + 0.5;
+		vec2 refractTexCoords = vec2(ndc.x, ndc.y);
+		vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 
-		color_f += pointLight(sphereLight, material, vertexPosition, vertexNormal);
-  		color_f += directionalLight(sun, material, vertexPosition, vertexNormal); // add sun
-		color_f += lightIntensity*color_f + color_f*0.2;  // intensity for daytime
-		color_f.w = 1.0;
+		vec2 distortion1 = texture2D(dudvMapTexture,  vec2((texCoord_v.x/2.0 + 5.0)*6.0, (texCoord_v.y/2.0 + 5.0)*6.0)).rg * 2.0 - 1.0;
+		refractTexCoords += distortion1;
+		reflectTexCoords += distortion1;
 
-		vec2 myText = texCoord_v;
-		myText.x = changeCoordinates();
+		vec4 reflectColor = texture(reflectionTexture, reflectTexCoords);
+		vec4 refractColor = texture(refractionTexture, refractTexCoords);
+		color_f = mix(reflectColor, refractColor, 0.5);
 
 		if(spotLight){
 			color_f += evalSpotLight(cameraReflector, material, vertexPosition, vertexNormal);
 		}
 
-		if (material.useTexture)
-			color_f = color_f * texture(texSampler, myText);
 		
 		if (isFog) 
 			color_f = fog()*color_f + (1 - fog()) * gray;

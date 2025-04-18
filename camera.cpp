@@ -10,6 +10,7 @@
 //-----------------------------------------------------------------------------------------
 #include "camera.h"
 
+
 // positions for static camera and their center 
 // first position
 glm::vec3 firstStatPosition = glm::vec3(1.0f, 4.0f, 1.5f);
@@ -17,11 +18,6 @@ glm::vec3 firstStatCenter = glm::vec3(0.0f, 2.0f, 2.0f);
 // second position
 glm::vec3 secStatPosition = glm::vec3(1.0f, 4.0f, 5.1f);
 glm::vec3 secStatCenter = glm::vec3(0.0f, -0.0f, -0.3f);
-// actual position in free mode
-glm::vec3 positionInFreeMode = glm::vec3(0.0f, 4.0f, 1.5f);
-glm::vec3 centerInFreeMode = glm::vec3(0.0f, 2.0f, 1.5f);
-glm::vec3 actualPosInFreeMode = glm::vec3(0.0f, 4.0f, 3.0f);
-glm::vec3 actualCenterInFreeMode = glm::vec3(0.0f, 4.0f, 3.0f);
 // what position is active
 glm::vec3 activeStaticPosition = firstStatPosition;
 glm::vec3 activeStaticCenter = firstStatCenter;
@@ -122,6 +118,18 @@ void cameraHandler::turnCameraLeft(Camera* camera, float deltaAngle) {
 
 	camera->direction.x = cos(angle);
 	camera->direction.y = sin(angle);
+
+}
+
+void cameraHandler::moveCamUp(Camera* camera, float distance) {
+
+	camera->position.z += distance;
+
+}
+
+void cameraHandler::moveCamDown(Camera* camera, float distance) {
+
+	camera->position.z += distance;
 
 }
 

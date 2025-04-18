@@ -21,6 +21,7 @@
 
 
 gameEngine* gameHandler = new gameEngine();
+waterBufferMaker* waterFBOHandler;
 renderObjects gameEngine::renderHandler;
 cameraHandler gameEngine::camHandler;
 splineHandler gameEngine::splineFucHandler;
@@ -211,7 +212,7 @@ void gameEngine::screenHandler::drawWindowContents() {
 
 	glUseProgram(shaderProgram.program);
 	glUniform1f(shaderProgram.timeLocation, gameState.elapsedTime);
-
+	
 	glEnable(GL_STENCIL_TEST);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 2, -1);
@@ -255,11 +256,22 @@ void gameEngine::screenHandler::drawWindowContents() {
 // rendering to display what you rendered.
 void gameEngine::screenHandler::displayCallback() {
 	GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+	glEnable(GL_CLIP_DISTANCE0);
+
+	glDisable(GL_CLIP_DISTANCE0);
+	waterFBOHandler->bindReflectionFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gameEngine::screenHandler::drawWindowContents();
+	waterFBOHandler->unbindCurrentFrameBuffer();
+
+	waterFBOHandler->bindRefractionFrameBuffer();
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	gameEngine::screenHandler::drawWindowContents();
+	waterFBOHandler->unbindCurrentFrameBuffer();
 
 	glClear(mask);
 
 	gameEngine::screenHandler::drawWindowContents();
-
 	glutSwapBuffers();
 }
 
@@ -487,6 +499,12 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 			gameState.drawBanner = true;
 		}
 		break;
+	case 'w':
+		camHandler.moveCamUp(gameObjects.camera, 3.0f);
+		break;
+	case 's':
+		camHandler.moveCamDown(gameObjects.camera, -3.0f);
+		break;
 	default:
 		;
 	}
@@ -632,10 +650,12 @@ void gameEngine::initializeApplication() {
 	gameUniVars.useLighting = true;
 	gameUniVars.isFog = false;
 	gameState.curveMotion = false;
+
+	waterFBOHandler= new waterBufferMaker();
 	// initialize shaders
 	renderHandler.getInitHandler().initializeShaderPrograms();
 	// create geometry for all models used
-	renderHandler.getInitHandler().initializeModels();
+	renderHandler.getInitHandler().initializeModels(waterFBOHandler);
 	glutMouseFunc(m_screenHandler.mouseCallback);
 	gameObjects.camera = NULL;
 	gameObjects.banner = NULL;
@@ -656,6 +676,7 @@ void gameEngine::finalizeApplication() {
 		gameObjects.banner = NULL;
 	}
 	delete gameHandler;
+	delete waterFBOHandler;
 	renderHandler.cleanupModels();
 	renderHandler.cleanupShaderPrograms();
 }

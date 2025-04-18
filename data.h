@@ -10,7 +10,7 @@
 #ifndef __DATA_H
 #define __DATA_H
 
-#define WINDOW_WIDTH   800
+#define WINDOW_WIDTH   1000
 #define WINDOW_HEIGHT  800
 #define WINDOW_TITLE   "PGR semestral"
 
@@ -55,8 +55,7 @@ const Material waterMaterial = {
 		glm::vec3(0.5f, 0.5f, 0.5f),  //ambient
 		glm::vec3(0.5f, 0.5f, 0.5f),  //deffuse
 		glm::vec3(0.7f, 0.7f, 0.7f),  //specular
-		1.0f,                         //shinines
-		"data/textures/w5.png"						  //texture name
+		1.0f,                         //shinines					 
 };
 
 typedef struct ObjectProp {

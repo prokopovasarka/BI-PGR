@@ -56,3 +56,9 @@ void setUniforms::setTransformUniforms(const glm::mat4& modelMatrix, const glm::
 	glm::mat4 normalMatrix = glm::transpose(glm::inverse(modelRotationMatrix));
 	glUniformMatrix4fv(shaderProgram.normalMatrixLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));  // correct matrix for non-rigid transform
 }
+
+void setUniforms::setWaterUni(SCommonShaderProgram& waterShader) {
+	glUniform1i(waterShader.reflectionTextureLocation, 0);
+	glUniform1i(waterShader.refractionTextureLocation, 1);
+	glUniform1i(waterShader.dudvMapLocation, 2);
+}

@@ -62,7 +62,6 @@ typedef struct _gameUniformVariables {
 	glm::vec3 reflectorPositionLocation;  // position of camera for reflector
 	glm::vec3 reflectorDirectionLocation;  // direction of camera for reflector
 
-
 }GameUniformVariables;
 
 typedef struct _commonShaderProgram {
@@ -96,6 +95,10 @@ typedef struct _commonShaderProgram {
 	GLint reflectorPositionLocation;
 	GLint reflectorDirectionLocation;
 	GLint reflectorIntensityLocation;
+	//reflection of water
+	GLint reflectionTextureLocation;
+	GLint refractionTextureLocation;
+	GLint dudvMapLocation;
 	// fog switcher
 	GLint isFogLocation;
 	// lights
