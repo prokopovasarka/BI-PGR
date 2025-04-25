@@ -61,7 +61,7 @@ public:
         static void mouseCallback(int buttonPressed, int buttonState, int mouseX, int mouseY);
         static void displayCallback();
         static void reshapeCallback(int newWidth, int newHeight);
-        static void drawWindowContents();
+        static void drawWindowContents(bool drawWater);
 
     };
 

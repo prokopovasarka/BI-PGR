@@ -29,4 +29,7 @@ void main() {
 
   texCoord_v = texCoord;
   mydistance =  distance(vec4(0.0, 0.0, 0.0, 1.0), vec4(vertexPosition, 1.0));
+  gl_ClipDistance[0] = texCoord_v.y - 1.1;
+  gl_ClipDistance[1] = 1.1 - texCoord_v.y;
+
 }

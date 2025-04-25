@@ -37,6 +37,10 @@ uniform sampler2D reflectionTexture;
 uniform sampler2D refractionTexture;
 uniform sampler2D dudvMapTexture;
 
+uniform float moveFactor;
+
+const float waveStrength = 0.02;
+
 //----
 
 uniform bool isFog;                // to enable fog
@@ -156,13 +160,26 @@ void main() {
 		vec2 refractTexCoords = vec2(ndc.x, ndc.y);
 		vec2 reflectTexCoords = vec2(ndc.x, -ndc.y);
 
-		vec2 distortion1 = texture2D(dudvMapTexture,  vec2((texCoord_v.x/2.0 + 5.0)*6.0, (texCoord_v.y/2.0 + 5.0)*6.0)).rg * 2.0 - 1.0;
-		refractTexCoords += distortion1;
-		reflectTexCoords += distortion1;
+		vec2 distortion1 = (texture2D(dudvMapTexture,  vec2((texCoord_v.x/2.0 + 5.0)*6.0 + moveFactor, (texCoord_v.y/2.0 + 5.0)*6.0)).rg * 2.0 - 1.0) * waveStrength;
+		vec2 distortion2 = (texture2D(dudvMapTexture,  vec2((-(texCoord_v.x/2.0 + 5.0)*6.0) + moveFactor, (texCoord_v.y/2.0 + 5.0)*6.0)).rg * 2.0 - 1.0 + moveFactor) * waveStrength;
+		vec2 totalDist = distortion1 + distortion2;
+
+		refractTexCoords += totalDist;
+		refractTexCoords = clamp(refractTexCoords, 0.001, 0.999);
+
+		reflectTexCoords += totalDist;
+		reflectTexCoords.x = clamp(reflectTexCoords.x, 0.001, 0.999);
+		reflectTexCoords.y = clamp(reflectTexCoords.y, -0.999, -0.001);
 
 		vec4 reflectColor = texture(reflectionTexture, reflectTexCoords);
 		vec4 refractColor = texture(refractionTexture, refractTexCoords);
-		color_f = mix(reflectColor, refractColor, 0.5);
+
+		vec3 viewDir = normalize(vertexPosition); 
+		float fresnelFactor = clamp(dot(viewDir, vec3(0.0, 1.0, 0.0)), 0.0, 1.0); // Fresnel Factor 
+
+		fresnelFactor = pow(1.0 - fresnelFactor, 10.0); // strength
+
+		color_f = mix(reflectColor, refractColor, fresnelFactor);
 
 		if(spotLight){
 			color_f += evalSpotLight(cameraReflector, material, vertexPosition, vertexNormal);

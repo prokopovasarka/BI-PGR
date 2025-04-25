@@ -99,6 +99,7 @@ typedef struct _commonShaderProgram {
 	GLint reflectionTextureLocation;
 	GLint refractionTextureLocation;
 	GLint dudvMapLocation;
+	GLint moveFactorLocation;
 	// fog switcher
 	GLint isFogLocation;
 	// lights

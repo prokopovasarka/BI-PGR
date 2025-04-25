@@ -161,7 +161,7 @@ void gameEngine::restartGame() {
 
 
 //-------------------------------------------------------------------DRAW GEOMETRY AND STUFF-------------------------------------------------------
-void gameEngine::screenHandler::drawWindowContents() {
+void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	// setup parallel projection
 	glm::mat4 orthoProjectionMatrix = glm::ortho(
 		-SCENE_WIDTH, SCENE_WIDTH,
@@ -218,7 +218,7 @@ void gameEngine::screenHandler::drawWindowContents() {
 	glStencilFunc(GL_ALWAYS, 2, -1);
 
 	renderHandler.getDrawHandler().drawCorpse(viewMatrix, projectionMatrix, corpseObj); // draw corpse, v=2
-	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix); // draw almost all meshes
+	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater); // draw almost all meshes
 
 	if (gameState.drawBanner) {
 		if (gameObjects.banner == NULL) {
@@ -256,22 +256,23 @@ void gameEngine::screenHandler::drawWindowContents() {
 // rendering to display what you rendered.
 void gameEngine::screenHandler::displayCallback() {
 	GLbitfield mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-	glEnable(GL_CLIP_DISTANCE0);
 
-	glDisable(GL_CLIP_DISTANCE0);
 	waterFBOHandler->bindReflectionFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	gameEngine::screenHandler::drawWindowContents();
+	glClear(mask);
+	glEnable(GL_CLIP_DISTANCE0);
+	gameEngine::screenHandler::drawWindowContents(false);
 	waterFBOHandler->unbindCurrentFrameBuffer();
 
+	glDisable(GL_CLIP_DISTANCE0);
 	waterFBOHandler->bindRefractionFrameBuffer();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	gameEngine::screenHandler::drawWindowContents();
+	glClear(mask);
+	glEnable(GL_CLIP_DISTANCE1);
+	gameEngine::screenHandler::drawWindowContents(false);
 	waterFBOHandler->unbindCurrentFrameBuffer();
 
 	glClear(mask);
-
-	gameEngine::screenHandler::drawWindowContents();
+	glDisable(GL_CLIP_DISTANCE1);
+	gameEngine::screenHandler::drawWindowContents(true);
 	glutSwapBuffers();
 }
 

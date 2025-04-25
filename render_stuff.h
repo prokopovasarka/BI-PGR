@@ -64,7 +64,7 @@ public:
 			MeshGeometry** geometry, GameUniformVariables gameUni);
 		void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, 
 			GameUniformVariables gameUni, const glm::mat4& projectionMatrix);
-		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool);
 		void drawCorpse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Object* corpse);
 		void drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion);
 		void drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);

@@ -15,6 +15,7 @@
 
 GLint SQUARES_AMOUNT = 500;  // amount of squares
 GLfloat  waterVertices[SQUARE_SIZE * 10000]; // array for terrain
+GLfloat WAVE_SPEED = 0.03f;
 
 // set object geometry to NULL
 MeshGeometry* towerGeometry = NULL;
@@ -575,6 +576,7 @@ void renderObjects::initHandler::initializeShaderPrograms() {
 	waterShader.reflectionTextureLocation = glGetUniformLocation(waterShader.program, "reflectionTexture");
 	waterShader.refractionTextureLocation = glGetUniformLocation(waterShader.program, "refractionTexture");
 	waterShader.dudvMapLocation = glGetUniformLocation(waterShader.program, "dudvMapTexture");
+	waterShader.moveFactorLocation = glGetUniformLocation(waterShader.program, "moveFactor");
 	// fog switch
 	waterShader.isFogLocation = glGetUniformLocation(waterShader.program, "isFog");
 	// lights
@@ -653,10 +655,16 @@ void renderObjects::initHandler::initWater(SCommonShaderProgram& shader, MeshGeo
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, waterFBOHandler->getReflectionTexture());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, waterFBOHandler->getRefractionTexture());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, waterFBOHandler->getdudvMapTexID());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
 	glBindVertexArray(0);
 	CHECK_GL_ERROR();
@@ -673,7 +681,7 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	std::cout << "Loading texture file: " << "dudv" << std::endl;
 	waterFBOHandler->setDudvMapTex(pgr::createTexture(DUDV_MAP));
 	initWater(waterShader, &waterGeometry, waterFBOHandler);
-	
+	glActiveTexture(GL_TEXTURE0);
 	if (loadSingleMesh(TOWER_MODEL_PATH, shaderProgram, &towerGeometry) != true) {
 		std::cerr << "initializeModels(): tower model loading failed." << std::endl;
 	}
@@ -688,8 +696,10 @@ void renderObjects::initHandler::initBannerGeometry(GLuint shader, MeshGeometry*
 // draw water
 void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni) {
 
+	GLfloat factor = WAVE_SPEED * gameState.elapsedTime;
+	factor = std::fmod(factor, 1.0);
 	glUseProgram(shaderProgram.program);
-	uniSetter.setWaterUni(shaderProgram);
+	uniSetter.setWaterUni(shaderProgram, factor);
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1, 1, 1));
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
@@ -775,13 +785,16 @@ void renderObjects::drawHandler::drawExplosion(const glm::mat4& viewMatrix, cons
 }
 
 // draw all models and animations
-void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool) {
 	glEnable(GL_STENCIL_TEST);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	//glStencilFunc(GL_ALWAYS, 0, -1);
 	drawSkybox(viewMatrix, projectionMatrix, skyboxShader, &skyboxGeometry, gameUniVars);
-	drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars);
 	drawTower(viewMatrix, projectionMatrix, shaderProgram, &towerGeometry, gameUniVars, towerPosition);
+
+	if (drawWaterBool) {
+		drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars);
+	}
 
 	glDisable(GL_STENCIL_TEST);
 }
