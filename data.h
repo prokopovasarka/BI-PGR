@@ -69,52 +69,24 @@ typedef struct ObjectProp {
 
 } ObjectProp;
 
-const ObjectProp platformProps {
-		glm::vec3(0.0, 1.0, 0.0),     // rotation axis
+
+const ObjectProp maxwellProps{
+		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
 		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(-20.4, 12.7, 1.29),   // position
+		glm::vec3(-2.4, 1.0, 1.15),   // position
+		0.7f,						// size
+		1.5f,						// rotation
+		false				       // align
+};
+
+const ObjectProp duckProps{
+		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
+		glm::vec3(0.0, 0.0, 0.0),      // not using
+		glm::vec3(1.4, 1.0, 1.15),   // position
 		0.1f,						// size
-		4.75,						// rotation
-		false				       // align
-
-};
-
-const ObjectProp boatProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(1.4, 3.7, 0.09),   // position
-		1.0f,						// size
-		8.0,						// rotation
+		1.5f,						// rotation
 		false				       // align
 };
-
-const ObjectProp boatSecProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(1.1, -1.7, 0.09),   // position
-		0.4f,						// size
-		-4.7,						// rotation
-		false				       // align
-};
-
-const ObjectProp lampProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(6.0, 2.0, 1.21),   // position
-		1.0f,						// size
-		4.7,						// rotation
-		false				       // align
-};
-
-const ObjectProp bridgeProps{
-		glm::vec3(0.1, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(6.4, 1.7, 0.09),   // position
-		4.0f,						// size
-		7.83,						// rotation
-		false				       // align
-};
-
 
 // amount of points in curve for camera
 const size_t curveSize = 14;

@@ -55,7 +55,7 @@ public:
 			glm::vec3 towerPosition);
 		void drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
 			SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni,
-			glm::vec3 cubePosition);
+			glm::vec3 cubePosition, float angle);
 		void drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix,
 			SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 spherePosition);
 		void drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram,

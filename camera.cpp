@@ -84,26 +84,36 @@ void cameraHandler::computeCameraPosition(GameState& gameState) {
 
 }
 
+float clamp(float value, float minVal, float maxVal) {
+	return std::max(minVal, std::min(value, maxVal));
+}
+
 // increase speed of movement
 void cameraHandler::increaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
+	if (deltaSpeed == 0.0f) deltaSpeed = CAMERA_SPEED_INCREMENT;
 
-	if (camera->speed <= 0.1f)
+	if (std::abs(camera->speed) <= 0.1f)
 		deltaSpeed = 0.75f;
-	camera->speed =
-		std::min(camera->speed + deltaSpeed, CAMERA_SPEED_MAX);
-	
-	
+
+	float direction = (camera->speed >= 0.0f) ? 1.0f : -1.0f;
+	camera->speed += deltaSpeed * direction;
+
+	camera->speed = clamp(camera->speed, -CAMERA_SPEED_MAX, CAMERA_SPEED_MAX);
 }
 
 // decrease speed of movement
 void cameraHandler::decreaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
+	if (deltaSpeed == 0.0f) deltaSpeed = CAMERA_SPEED_INCREMENT;
 
-	if (abs(camera->speed) <= 0.2f)
+	if (std::abs(camera->speed) <= 0.2f)
 		deltaSpeed = 0.75f;
-	camera->speed =
-		std::max(camera->speed - deltaSpeed, -CAMERA_SPEED_MAX);
 
-
+	if (std::abs(camera->speed) <= deltaSpeed) {
+		camera->speed = 0.0f;
+	}
+	else {
+		camera->speed -= (camera->speed > 0 ? deltaSpeed : -deltaSpeed);
+	}
 }
 
 // turning camera left

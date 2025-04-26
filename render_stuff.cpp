@@ -21,21 +21,15 @@ GLfloat WAVE_SPEED = 0.03f;
 MeshGeometry* towerGeometry = NULL;
 MeshGeometry* skyboxGeometry = NULL;
 MeshGeometry* waterGeometry = NULL;
-MeshGeometry* sphereGeometry = NULL;
-MeshGeometry* platformGeometry = NULL;
-MeshGeometry* platformCubeGeometry = NULL;
 MeshGeometry* explosionGeometry = NULL;
 MeshGeometry* bannerGeometry = NULL;
 MeshGeometry* houseGeometry = NULL;
-MeshGeometry* plateauGeometry = NULL;
 MeshGeometry* cubeGeometry = NULL;
+MeshGeometry* sphereGeometry = NULL;
 
 // more meshes
-std::vector<MeshGeometry*> boatGeometry;
-std::vector<MeshGeometry*> bridgeGeometry;
-std::vector<MeshGeometry*> corpseGeometry;
-std::vector<MeshGeometry*> lampGeometry;
-std::vector<MeshGeometry*> boatSecGeometry;
+std::vector<MeshGeometry*> maxwellGeometry;
+std::vector<MeshGeometry*> duckGeometry;
 
 // paths to textures
 const char* SKYBOX_CUBE_TEXTURE_FILE_PREFIX = "data/skybox/skybox";
@@ -44,23 +38,25 @@ const char* BANNER_TEXTURE_PATH = "data/textures/banner2.png";
 const char* DUDV_MAP = "data/textures/dudv.jpg";
 // paths to models
 const char* TOWER_MODEL_PATH = "data/models/tower/tower.obj";
-const char* BOAT_MODEL_PATH = "data/models/boat.obj";
-const char* BRIDGE_MODEL_PATH = "data/models/bridge/woodenbridge.obj";
-const char* SPHERE_MODEL_PATH = "data/models/icosphere.obj";
-const char* CORPSE_MODEL_PATH = "data/models/Corpse_obj/corpse.obj";
-const char* BOAT_V2_MODEL_PATH = "data/models/OldBoat.obj";
 const char* HOUSE_MODEL_PATH = "data/models/house/house.obj";
-const char* LAMP_MODEL_PATH = "data/models/lamp.obj";
-const char* PLATEAU_MODEL_PATH = "data/models/plateau/platform.obj";
 const char* CUBE_MODEL_PATH = "data/models/cube/cube.obj";
+const char* MAXWELL_MODEL_PATH = "data/models/maxwell/maxwell.obj";
 const char* GRASS_TEXTURE_PATH = "data/textures/plant.png";
+const char* SPHERE_MODEL_PATH = "data/models/icosphere.obj";
+const char* DUCK_MODEL_PATH = "data/models/duck/duck.obj";
+
+
+//textures
+GLuint grassTexture;
 
 
 // positions of models
 glm::vec3 towerPosition = glm::vec3(0.0f, 0.02f, 1.4f);
-glm::vec3 cubePosition = glm::vec3(3.0f, -1.02f, 0.0f);
-glm::vec3 spherePosition = glm::vec3(-2.0, 1.8, 2.0);
-glm::vec3 housePosition = glm::vec3(2.0, -2.8, 0.6);
+glm::vec3 cubePosition = glm::vec3(3.0f, -1.02f, 1.2f);
+glm::vec3 cube2Position = glm::vec3(3.0f, -0.42f, 1.2f);
+glm::vec3 cube3Position = glm::vec3(2.4f, -0.82f, 1.2f);
+glm::vec3 spherePosition = glm::vec3(2.15, -2.72, 1.42);
+glm::vec3 housePosition = glm::vec3(2.0, -2.8, 1.5);
 glm::vec3 plateauPosition = glm::vec3(2.0, -2.8, 0.0);
 
 // shaders
@@ -681,9 +677,24 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	std::cout << "Loading texture file: " << "dudv" << std::endl;
 	waterFBOHandler->setDudvMapTex(pgr::createTexture(DUDV_MAP));
 	initWater(waterShader, &waterGeometry, waterFBOHandler);
-	glActiveTexture(GL_TEXTURE0);
 	if (loadSingleMesh(TOWER_MODEL_PATH, shaderProgram, &towerGeometry) != true) {
 		std::cerr << "initializeModels(): tower model loading failed." << std::endl;
+	}
+	if (loadSingleMesh(CUBE_MODEL_PATH, shaderProgram, &cubeGeometry) != true) {
+		std::cerr << "initializeModels(): Cube model loading failed." << std::endl;
+	}
+	grassTexture = pgr::createTexture(GRASS_TEXTURE_PATH);
+	if (loadSingleMesh(HOUSE_MODEL_PATH, shaderProgram, &houseGeometry) != true) {
+		std::cerr << "initializeModels(): house model loading failed." << std::endl;
+	}
+	if (loadMesh(MAXWELL_MODEL_PATH, shaderProgram, &maxwellGeometry) != true) {
+		std::cerr << "initializeModels(): maxwell model loading failed." << std::endl;
+	}
+	if (loadMesh(DUCK_MODEL_PATH, shaderProgram, &duckGeometry) != true) {
+		std::cerr << "initializeModels(): flamingo model loading failed." << std::endl;
+	}
+	if (loadSingleMesh(SPHERE_MODEL_PATH, shaderProgram, &sphereGeometry) != true) {
+		std::cerr << "initializeModels(): sphere model loading failed." << std::endl;
 	}
 }
 
@@ -715,13 +726,37 @@ void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const gl
 
 // draws banner with credits
 void renderObjects::drawHandler::drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+
 }
 
 //--------------------------------------------------------------------------------MODELS----------------------------------------------------------
 
 // draw single object
 void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, ObjectProp param) {
-	
+	glUseProgram(shaderProgram.program);
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+
+	if (param.align) {
+		modelMatrix = splineHandler::alignObject(param.position, param.front, param.up);
+	}
+	else {
+		modelMatrix = glm::translate(modelMatrix, param.position);
+		modelMatrix = glm::rotate(modelMatrix, param.angle, param.front);
+	}
+
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * param.size);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+
+	for (int i = 0; i < (*geometry).size(); i++) {
+
+		uniSetter.setMaterialUniforms((*geometry)[i],shaderProgram, gameUni);
+
+		glBindVertexArray((*geometry)[i]->vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, (*geometry)[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+	glUseProgram(0);
+	return;
 }
 
 // draw platform model
@@ -730,8 +765,40 @@ void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const gl
 }
 
 // draw cube model
-void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 cubePosition) {
+void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 cubePosition, float angle) {
+	glUseProgram(shaderProgram.program);
+	uniSetter.setMaterialUniforms((*geometry), shaderProgram, gameUni);
 
+	glm::mat4 modelMatrix;
+	modelMatrix = splineHandler::alignObject(cubePosition, glm::vec3(0.4, 1.0, 0.0), glm::vec3(0.0f, 0.5f, 1.0f));
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.2, 0.2, 0.2));
+	modelMatrix = glm::rotate(modelMatrix, angle, glm::vec3(1.0, 0.0, 0.0));
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	//set material uniforms with two textures
+	glUniform3fv(shaderProgram.diffuseLocation, 1, glm::value_ptr(cubeGeometry->diffuse));
+	glUniform3fv(shaderProgram.ambientLocation, 1, glm::value_ptr(cubeGeometry->ambient));
+	glUniform3fv(shaderProgram.specularLocation, 1, glm::value_ptr(cubeGeometry->specular));
+	glUniform1f(shaderProgram.shininessLocation, cubeGeometry->shininess);
+
+	glUniform1i(shaderProgram.useTextureLocation, 1);       
+
+	// Activate textures
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cubeGeometry->texture);
+	glUniform1i(shaderProgram.texSamplerLocation, 0);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, grassTexture);
+	glUniform1i(shaderProgram.texSampler2Location, 3);
+	//glUniform1i(shaderProgram.secTextureLocation, 3);
+
+	// draw object
+	glBindVertexArray(cubeGeometry->vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, cubeGeometry->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+
+	glUseProgram(0);
+	return;
 }
 
 // draws tower model
@@ -752,12 +819,36 @@ void renderObjects::drawHandler::drawTower(const glm::mat4& viewMatrix, const gl
 
 // draw sphere model
 void renderObjects::drawHandler::drawSphere(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 spherePosition) {
-	
+	glUseProgram(shaderProgram.program);
+	uniSetter.setMaterialUniforms( (*geometry), shaderProgram, gameUni);
+
+	glm::mat4 modelMatrix;
+	modelMatrix = splineHandler::alignObject(spherePosition, glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.05, 0.05, 0.05));
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	glBindVertexArray((*geometry)->vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, (*geometry)->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+	return;
 }
 
 // draw house model
 void renderObjects::drawHandler::drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition) {
-	
+	glUseProgram(shaderProgram.program);
+	uniSetter.setMaterialUniforms( (*geometry), shaderProgram, gameUni);
+
+	glm::mat4 modelMatrix;
+	modelMatrix = splineHandler::alignObject(housePosition, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(0.7, 0.7, 0.7));
+	modelMatrix = glm::rotate(modelMatrix, 4.7f, glm::vec3(1.0, 0.0, 0.0));
+	modelMatrix = glm::rotate(modelMatrix, 4.7f, glm::vec3(0.0, 0.0, 1.0));
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	glBindVertexArray((*geometry)->vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, (*geometry)->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
+	glUseProgram(0);
+	return;
 }
 
 // draw plateau model
@@ -791,6 +882,14 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	//glStencilFunc(GL_ALWAYS, 0, -1);
 	drawSkybox(viewMatrix, projectionMatrix, skyboxShader, &skyboxGeometry, gameUniVars);
 	drawTower(viewMatrix, projectionMatrix, shaderProgram, &towerGeometry, gameUniVars, towerPosition);
+	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cubePosition, 8.0f);
+	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube2Position, 3.0f);
+	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube3Position, 11.0f);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, maxwellProps);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, duckProps);
+	drawHouse(viewMatrix, projectionMatrix, shaderProgram, &houseGeometry, gameUniVars, housePosition);
+	glStencilFunc(GL_ALWAYS, 1, -1);
+	drawSphere(viewMatrix, projectionMatrix, shaderProgram, &sphereGeometry, gameUniVars, spherePosition);
 
 	if (drawWaterBool) {
 		drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars);
@@ -828,5 +927,15 @@ void renderObjects::cleanupModels() {
 	cleanupGeometry(towerGeometry);
 	cleanupGeometry(skyboxGeometry);
 	cleanupGeometry(waterGeometry);
-	
+	cleanupGeometry(houseGeometry);
+	cleanupGeometry(cubeGeometry);
+	cleanupGeometry(sphereGeometry);
+	std::vector<MeshGeometry*> v = maxwellGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
+	v = duckGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
 }

@@ -109,10 +109,10 @@ void gameEngine::evalLightIntensity() {
 // changing intensity of point light
 void gameEngine::changePointLight() {
 
-	float max_light = 0.9f;
+	float max_light = 11.0f;
 	float min_light = 0.0;
 
-	gameUniVars.pointLightIntensity += 0.3;
+	gameUniVars.pointLightIntensity += 5.3;
 	if (gameUniVars.pointLightIntensity > max_light) {
 		gameUniVars.pointLightIntensity = min_light;
 	}
@@ -426,7 +426,7 @@ void gameEngine::screenHandler::mouseCallback(int buttonPressed, int buttonState
 		} if (objectID == 2) { // corpse
 			corpseAnimation = !corpseAnimation;
 		} if (objectID == 3) { // boat
-			createExplosion(boatProps.position);
+			//createExplosion(boatProps.position);
 		}
 	}
 	if ((buttonPressed == GLUT_RIGHT_BUTTON) && (buttonState == GLUT_DOWN)) {
@@ -587,7 +587,7 @@ void gameEngine::gameMenu(int choice) {
 		break;
 	case 4:
 		// explosion
-		createExplosion(boatProps.position);
+		//createExplosion(boatProps.position);
 		break;
 	case 5:
 		// sphere light intensity
