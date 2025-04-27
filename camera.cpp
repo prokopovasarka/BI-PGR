@@ -79,9 +79,9 @@ void cameraHandler::computeCameraPosition(GameState& gameState) {
 	if (!gameState.freeCameraMode) {
 		actualPosition = mix(actualPosition, activeStaticPosition, teleportSpeed);
 		actualCenter = mix(actualCenter, activeStaticCenter, teleportSpeed);
-	
+		return;
 	}
-
+	
 }
 
 float clamp(float value, float minVal, float maxVal) {
@@ -91,9 +91,6 @@ float clamp(float value, float minVal, float maxVal) {
 // increase speed of movement
 void cameraHandler::increaseCameraSpeed(Camera* camera, float deltaSpeed = CAMERA_SPEED_INCREMENT) {
 	if (deltaSpeed == 0.0f) deltaSpeed = CAMERA_SPEED_INCREMENT;
-
-	if (std::abs(camera->speed) <= 0.1f)
-		deltaSpeed = 0.75f;
 
 	float direction = (camera->speed >= 0.0f) ? 1.0f : -1.0f;
 	camera->speed += deltaSpeed * direction;

@@ -159,17 +159,19 @@ void main() {
 		if(spotLight){
 			color_f += spotLightEval(cameraReflector, material, vertexPosition, vertexNormal);
 		}
-		
+
+		//using two textures
+		if (material.useTexture && secTexture){
+			vec4 tex0, tex1, res;
+			tex0 = texture(texSampler, texCoord_v);
+			tex1 = texture(texSampler2, texCoord_v);
+			res = mix(tex0, tex1, tex1.a);
+			color_f = vec4(color_f.rgb * res.rgb, res.a);
+		} 
+		// using only one texture
 		if (material.useTexture)
 			color_f = color_f * texture(texSampler, texCoord_v);
 
-		if (material.useTexture && secTexture){
-		vec4 tex0, tex1, res;
-		tex0 = texture(texSampler, texCoord_v);
-		tex1 = texture(texSampler2, texCoord_v);
-		res = mix(tex0, tex1, tex1.a);
-		color_f = vec4(color_f.rgb * res.rgb, res.a);
-		} 
 
 		if(fog) {
 			useFog();

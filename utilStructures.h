@@ -172,5 +172,14 @@ typedef struct _bannerShaderProgram {
 	GLint texSamplerLocation;
 } BannerShaderProgram;
 
+typedef struct _barShaderProgram {
+	GLuint program;
+	GLint posLocation;
+	GLint texCoordLocation;
+	GLint PVMmatrixLocation;
+	GLint timeLocation;
+	GLint texSamplerLocation;
+
+} BarShaderProgram;
 
 #endif

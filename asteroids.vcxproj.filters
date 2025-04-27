@@ -101,5 +101,11 @@
     <None Include="lighting.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="loadingBar.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="loadingBar.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

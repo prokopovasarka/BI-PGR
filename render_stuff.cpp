@@ -34,12 +34,13 @@ const char* SKYBOX_CUBE_TEXTURE_FILE_PREFIX = "data/skybox/skybox";
 const char* EXPLOSION_TEXTURE_PATH = "data/textures/explosion/explosion.png";
 const char* BANNER_TEXTURE_PATH = "data/textures/banner2.png";
 const char* DUDV_MAP = "data/textures/dudv.jpg";
+const char* GRASS_TEXTURE_PATH = "data/textures/plant.png";
+const char* LOADING_BAR_PATH = "data/textures/loadingBar.jpg";
 // paths to models
 const char* TOWER_MODEL_PATH = "data/models/tower/tower.obj";
 const char* HOUSE_MODEL_PATH = "data/models/house/house.obj";
 const char* CUBE_MODEL_PATH = "data/models/cube/cube.obj";
 const char* MAXWELL_MODEL_PATH = "data/models/maxwell/maxwell.obj";
-const char* GRASS_TEXTURE_PATH = "data/textures/plant.png";
 const char* SPHERE_MODEL_PATH = "data/models/icosphere.obj";
 const char* DUCK_MODEL_PATH = "data/models/duck/duck.obj";
 const char* BALLOON_MODEL_PATH = "data/models/balloons/balloon.obj";
@@ -47,6 +48,7 @@ const char* BOAT_MODEL_PATH = "data/models/boat/v_boat.obj";
 
 //textures
 GLuint grassTexture;
+GLuint loadingBarTexture;
 
 
 // positions of models
@@ -63,6 +65,7 @@ SCommonShaderProgram shaderProgram;
 SCommonShaderProgram waterShader;
 ExplosionShaderProgram explosionShader;
 BannerShaderProgram bannerShaderProgram;
+BarShaderProgram barShaderProgram;
 
 // uniform variables
 GameUniformVariables gameUniVars;
@@ -614,6 +617,25 @@ void renderObjects::initHandler::initializeShaderPrograms() {
 	bannerShaderProgram.PVMmatrixLocation = glGetUniformLocation(bannerShaderProgram.program, "PVMmatrix");
 	bannerShaderProgram.timeLocation = glGetUniformLocation(bannerShaderProgram.program, "time");
 	bannerShaderProgram.texSamplerLocation = glGetUniformLocation(bannerShaderProgram.program, "texSampler");
+
+	shaderList.clear();
+
+	// LOADING BAR SHADER
+
+	// push vertex shader and fragment shader
+	shaderList.push_back(pgr::createShaderFromFile(GL_VERTEX_SHADER, "loadingBar.vert"));
+	shaderList.push_back(pgr::createShaderFromFile(GL_FRAGMENT_SHADER, "loadingBar.frag"));
+
+	barShaderProgram.program = pgr::createProgram(shaderList);
+
+	// Získejte pozice atributù (vertex position a texture coordinates)
+	barShaderProgram.posLocation = glGetAttribLocation(barShaderProgram.program, "position");
+	barShaderProgram.texCoordLocation = glGetAttribLocation(barShaderProgram.program, "texCoord");
+
+	// Získejte pozice uniformních promìnných
+	barShaderProgram.PVMmatrixLocation = glGetUniformLocation(barShaderProgram.program, "PVMmatrix");
+	barShaderProgram.timeLocation = glGetUniformLocation(barShaderProgram.program, "time");
+	barShaderProgram.texSamplerLocation = glGetUniformLocation(barShaderProgram.program, "texSampler");
 }
 
 // initialize materials
@@ -675,6 +697,7 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	std::cout << "Loading texture file: " << "dudv" << std::endl;
 	waterFBOHandler->setDudvMapTex(pgr::createTexture(DUDV_MAP));
 	initWater(waterShader, &waterGeometry, waterFBOHandler);
+	initBannerGeometry(barShaderProgram.program, &bannerGeometry);
 	if (loadSingleMesh(TOWER_MODEL_PATH, shaderProgram, &towerGeometry) != true) {
 		std::cerr << "initializeModels(): tower model loading failed." << std::endl;
 	}
@@ -682,6 +705,9 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 		std::cerr << "initializeModels(): Cube model loading failed." << std::endl;
 	}
 	grassTexture = pgr::createTexture(GRASS_TEXTURE_PATH);
+	if(!grassTexture) {
+		std::cerr << "loading failed." << std::endl;
+	};
 	if (loadSingleMesh(HOUSE_MODEL_PATH, shaderProgram, &houseGeometry) != true) {
 		std::cerr << "initializeModels(): house model loading failed." << std::endl;
 	}
@@ -704,6 +730,31 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 
 // initialize banner geometry
 void renderObjects::initHandler::initBannerGeometry(GLuint shader, MeshGeometry** geometry) {
+	*geometry = new MeshGeometry;
+
+	(*geometry)->texture = pgr::createTexture(LOADING_BAR_PATH);
+	loadingBarTexture = (*geometry)->texture;
+	glBindTexture(GL_TEXTURE_2D, (*geometry)->texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+
+	glGenVertexArrays(1, &((*geometry)->vertexArrayObject));
+	glBindVertexArray((*geometry)->vertexArrayObject);
+
+	glGenBuffers(1, &((*geometry)->vertexBufferObject));
+	glBindBuffer(GL_ARRAY_BUFFER, (*geometry)->vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(bannerVertexData), bannerVertexData, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(barShaderProgram.posLocation);
+	glEnableVertexAttribArray(barShaderProgram.texCoordLocation);
+	// vertices of triangles - start at the beginning of the interlaced array
+	glVertexAttribPointer(barShaderProgram.posLocation, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	// texture coordinates of each vertices are stored just after its position
+	glVertexAttribPointer(barShaderProgram.texCoordLocation, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	glBindVertexArray(0);
+
+	(*geometry)->numTriangles = bannerNumQuadVertices;
 }
 
 //--------------------------------------------------------------------------------TEXTURES--------------------------------------------------------
@@ -729,8 +780,38 @@ void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const gl
 }
 
 // draws banner with credits
-void renderObjects::drawHandler::drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix) {
+void renderObjects::drawHandler::drawBanner(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth) {
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);                     // alpha 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	glUseProgram(barShaderProgram.program);
+
+	glm::mat4 P = glm::ortho(-1.f, 1.f, -1.f, 1.f);    // 2-D projectionviewport
+	glm::mat4 V = glm::mat4(1.f);                      //no view
+	glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(0.0f, 0.95f, 0.f)) // right up
+		* glm::scale(glm::mat4(1.f), glm::vec3(1.0f, 0.2f, 1.f));
+
+	glm::mat4 PVM = P * V * M;
+	glUniformMatrix4fv(barShaderProgram.PVMmatrixLocation, 1, GL_FALSE, glm::value_ptr(PVM));
+
+	// Pass the speed to the shader
+	glUniform1f(barShaderProgram.timeLocation, loadingBarWidth);  // Pass 'speed' directly to the shader to control texture cut-off
+
+	// Bind texture
+	glBindTexture(GL_TEXTURE_2D, loadingBarTexture);
+	glUniform1i(barShaderProgram.texSamplerLocation, 0); // Assuming texture unit 0 is used
+
+	// Bind the vertex array object and draw the geometry
+	glBindVertexArray(bannerGeometry->vertexArrayObject);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, bannerGeometry->numTriangles);
+
+	glBindVertexArray(0);
+
+	glUseProgram(0);
+
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
 }
 
 //--------------------------------------------------------------------------------MODELS----------------------------------------------------------
@@ -779,23 +860,23 @@ void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm
 	glUniform3fv(shaderProgram.specularLocation, 1, glm::value_ptr(cubeGeometry->specular));
 	glUniform1f(shaderProgram.shininessLocation, cubeGeometry->shininess);
 
-	glUniform1i(shaderProgram.useTextureLocation, 1);       
-
-	// Activate textures
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, cubeGeometry->texture);
+	glUniform1i(shaderProgram.useTextureLocation, 1);
 	glUniform1i(shaderProgram.texSamplerLocation, 0);
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, grassTexture);
-	glUniform1i(shaderProgram.texSampler2Location, 3);
-	//glUniform1i(shaderProgram.secTextureLocation, 3);
+	//glUniform1i(shaderProgram.secTextureLocation, 1);
+	glUniform1i(shaderProgram.texSampler2Location, 4);
 
-	// draw object
+	glActiveTexture(GL_TEXTURE0 + 0);
+	glBindTexture(GL_TEXTURE_2D, cubeGeometry->texture);
+	glActiveTexture(GL_TEXTURE0 + 4);
+	glBindTexture(GL_TEXTURE_2D, grassTexture);
+
 	glBindVertexArray(cubeGeometry->vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, cubeGeometry->numTriangles * 3, GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
 
+	// to make sure we have texture only at cube
+	glUniform1i(shaderProgram.secTextureLocation, 0);
+	glBindVertexArray(0);
 	glUseProgram(0);
 	return;
 }

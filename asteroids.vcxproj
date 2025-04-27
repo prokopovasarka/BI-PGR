@@ -38,6 +38,8 @@
     <None Include="explosion.vert" />
     <None Include="lighting.frag" />
     <None Include="lighting.vert" />
+    <None Include="loadingBar.frag" />
+    <None Include="loadingBar.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />
     <None Include="water.frag" />

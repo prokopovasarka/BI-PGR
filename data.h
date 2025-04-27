@@ -101,12 +101,11 @@ const glm::vec3 curveData[] = {
 const int bannerNumQuadVertices = 4;
 // vertices
 const float bannerVertexData[bannerNumQuadVertices * 5] = {
-
 	// x      y      z     u     v
-	-1.0f,  0.15f, 0.0f, 0.0f, 1.0f,
-	-1.0f, -0.15f, 0.0f, 0.0f, 0.0f,
-	 1.0f,  0.15f, 0.0f, 3.0f, 1.0f,
-	 1.0f, -0.15f, 0.0f, 3.0f, 0.0f
+	-1.0f,  0.15f, 0.0f, 0.0f, 1.0f, // levý horní roh
+	-1.0f, -0.15f, 0.0f, 0.0f, 0.0f, // levý dolní roh
+	 1.0f,  0.15f, 0.0f, 1.0f, 1.0f, // pravý horní roh (u x bude závislé na rychlosti)
+	 1.0f, -0.15f, 0.0f, 1.0f, 0.0f  // pravý dolní roh (u x bude závislé na rychlosti)
 };
 
 // amount of vertexes for explosion

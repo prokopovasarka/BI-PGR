@@ -72,7 +72,7 @@ public:
 		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps);
 		void drawDuck(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir);
 		void drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion);
-		void drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+		void drawBanner(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth);
 		void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
 			MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition);
 		void drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 

@@ -26,6 +26,8 @@ renderObjects gameEngine::renderHandler;
 cameraHandler gameEngine::camHandler;
 splineHandler gameEngine::splineFucHandler;
 
+float loadingBarWidth = 0.0f;
+
 bool duckAnimation; //if animation is on or off
 
 //-----------------------------------------------------------CREATING BANNER-------------------------------------------------------------
@@ -57,6 +59,7 @@ void gameEngine::duckHandler::createDuck() {
 
 	duck = newDuck;
 }
+
 //----------------------------------------------------------INTERACTION WITH OBJECTS------------------------------------------------------
 void createExplosion(glm::vec3 position) {
 	Explosion* newExplosion = new Explosion;
@@ -227,13 +230,16 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	renderHandler.getDrawHandler().drawDuck(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["duck"], duck->position, duck->direction); // draw duck, v=2
 	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps); // draw almost all meshes
 
+	//update loading bar
+	renderHandler.getDrawHandler().drawBanner(viewMatrix, projectionMatrix, loadingBarWidth);
+
 	if (gameState.drawBanner) {
 		if (gameObjects.banner == NULL) {
 			gameObjects.banner = gameHandler->createBanner();
 		}
 		else {
 			if (!gameState.freeCameraMode) {
-				renderHandler.getDrawHandler().drawBanner(gameObjects.banner, orthoViewMatrix, orthoProjectionMatrix);
+				//renderHandler.getDrawHandler().drawBanner(gameObjects.banner, orthoViewMatrix, orthoProjectionMatrix);
 			}
 			else {
 				gameState.drawBanner = false;
@@ -309,6 +315,8 @@ void gameEngine::updateObjects(float elapsedTime) {
 
 	m_duckHandler.updateDuck(timeDelta); // new position for duck
 	gameHandler->evalLightIntensity(); // change light intensity with according to game time
+
+	loadingBarWidth = glm::clamp(gameObjects.camera->speed / 10.0f, 0.0f, 1.0f); //clam curr speed
 
 	currentColor = mix(currentColor, day, timeDelta);
 
@@ -509,10 +517,10 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 		}
 		break;
 	case 'w':
-		camHandler.moveCamUp(gameObjects.camera, 3.0f);
+		camHandler.moveCamUp(gameObjects.camera, 0.3f);
 		break;
 	case 's':
-		camHandler.moveCamDown(gameObjects.camera, -3.0f);
+		camHandler.moveCamDown(gameObjects.camera, -0.3f);
 		break;
 	default:
 		;
@@ -656,6 +664,8 @@ void gameEngine::initializeApplication() {
 	srand((unsigned int)time(NULL));
 	glClearColor(0.06f, 0.08f, 0.16f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND); // enable blending
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	gameUniVars.useLighting = true;
 	gameUniVars.isFog = false;

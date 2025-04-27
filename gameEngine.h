@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "configLoader.h"
 
+
 // path to config.txt
 const char* CONFIG_PATH = "data/config.txt";
 
@@ -22,7 +23,7 @@ extern glm::vec3 actualCenter;
 //to know last position in the free mode
 glm::vec3 freeCamPos;
 glm::vec3 freeCamDir;
-float teleportSpeed = 0.2;
+float teleportSpeed = 0.2f;
 // to show day colors
 glm::vec4 day = glm::vec4(0.95f, 0.95f, 0.85f, 1.0f);
 glm::vec4 currentColor = day;  //current state od daytime
