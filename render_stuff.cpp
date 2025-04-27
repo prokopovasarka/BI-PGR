@@ -855,13 +855,23 @@ void renderObjects::drawHandler::drawPlateau(const glm::mat4& viewMatrix, const 
 	
 }
 
-// draw corpse method for animation
-void renderObjects::drawHandler::drawCorpseMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, Object* corpse) {
-	
-}
+// draw duck
+void renderObjects::drawHandler::drawDuck(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir) {
+	glUseProgram(shaderProgram.program);
 
-// draw corpse
-void renderObjects::drawHandler::drawCorpse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Object* corpse) {
+	glm::mat4 modelMatrix = splineHandler::alignObject(position,
+		dir, glm::vec3(0.0f, 0.0f, 1.0f));
+
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * param.size);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	for (int i = 0; i < duckGeometry.size(); i++) {
+
+		uniSetter.setMaterialUniforms( duckGeometry[i], shaderProgram, gameUni);
+		glBindVertexArray(duckGeometry[i]->vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, duckGeometry[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 // draw explosion method for animation
@@ -885,7 +895,7 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube2Position, 3.0f);
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube3Position, 11.0f);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell"]);
-	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck"]);
+	//drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &balloonGeometry, gameUniVars, loadProps["balloon"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &boatGeometry, gameUniVars, loadProps["boat"]);
 	drawHouse(viewMatrix, projectionMatrix, shaderProgram, &houseGeometry, gameUniVars, housePosition);

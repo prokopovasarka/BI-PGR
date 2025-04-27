@@ -85,7 +85,7 @@ glm::vec3 splineHandler::evalCurveSegFirstDev(const glm::vec3 points[], const fl
 glm::vec3 splineHandler::evaluateClosedCurve(const glm::vec3 points[], const size_t count, const float t) {
 	glm::vec3 result(0.0, 0.0, 0.0);
 
-	int i = (int)t;
+	int i = (int)(t*count);
 	glm::vec3 newPoints[4];
 
 	newPoints[0] = points[(i - 1 + count) % count];
@@ -93,22 +93,19 @@ glm::vec3 splineHandler::evaluateClosedCurve(const glm::vec3 points[], const siz
 	newPoints[2] = points[(i + 1) % count];
 	newPoints[3] = points[(i + 2) % count];
 
-	result = evaluateCurveSegment(
-		newPoints,
-		t - i
-	);
+	result = evaluateCurveSegment(newPoints, t * count - i);
 
 	return result;
 }
 
  // evaluate first derivate of the whole curve
 glm::vec3 splineHandler::evalClosedCurveFirstDev(const glm::vec3 points[], const size_t count, const float t) {
-	int i = (int)t;
+	int i = (int)(t*count);
 	glm::vec3 newPoints[4];
 	newPoints[0] = points[(i - 1 + count) % count];
 	newPoints[1] = points[i % count];
 	newPoints[2] = points[(i + 1) % count];
 	newPoints[3] = points[(i + 2) % count];
 	glm::vec3 result = evalCurveSegFirstDev( newPoints, t - i );
-	return result;
+	return -result;
 }

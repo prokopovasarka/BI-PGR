@@ -7,7 +7,7 @@ angle=1.5
 align=false
 
 [duck]
-front=1.0,0.0,0.0
+front=0.0,1.0,0.0
 up=0.0,0.0,0.0
 position=1.4,1.0,1.15
 size=0.1

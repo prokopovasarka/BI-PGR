@@ -6,7 +6,7 @@
  * \brief      house by the lake
  *
  *  Interactive scene where user can move around and click on objects.
- *  Scene has changing daytime, lights, interactive corpse animation.
+ *  Scene has changing daytime, lights, interactive duck animation.
 */
 //-----------------------------------------------------------------------------------------
 
@@ -26,14 +26,13 @@ renderObjects gameEngine::renderHandler;
 cameraHandler gameEngine::camHandler;
 splineHandler gameEngine::splineFucHandler;
 
-Object* corpseObj; //init corpse object
-bool corpseAnimation; //if animation is on or off
+bool duckAnimation; //if animation is on or off
 
 //-----------------------------------------------------------CREATING BANNER-------------------------------------------------------------
 Object* gameEngine::createBanner() {
 	Object* newBanner = new Object;
 
-	newBanner->position = glm::vec3(0.0f, 0.0f, 0.0f);
+	newBanner->position = glm::vec3(1.4f, 1.0f, 1.15f);
 	newBanner->direction = glm::vec3(1.0f, 0.0f, 0.0f);
 	newBanner->size = 3.0f;
 
@@ -42,6 +41,21 @@ Object* gameEngine::createBanner() {
 	newBanner->currentTime = newBanner->startTime;
 
 	return newBanner;
+}
+
+//---------------------------------------------------------CREATE DUCK--------------------------------------------------------------------
+void gameEngine::duckHandler::createDuck() {
+	Object* newDuck = new Object;
+
+	newDuck->position = m_loadProps["duck"].position;
+	newDuck->direction = m_loadProps["duck"].front;
+	newDuck->size = m_loadProps["duck"].size;
+
+	newDuck->destroyed = false;
+	newDuck->startTime = gameState.elapsedTime;
+	newDuck->currentTime = newDuck->startTime;
+
+	duck = newDuck;
 }
 //----------------------------------------------------------INTERACTION WITH OBJECTS------------------------------------------------------
 void createExplosion(glm::vec3 position) {
@@ -71,23 +85,16 @@ void controlExplosion(Explosion* explosion) {
 		explosion->destroyed = true;
 }
 
-// creating corpse model
-
-void gameEngine::corpseHandler::createCorpse() {
-	corpseObj = new Object;
-	corpseObj->position = glm::vec3(-3.2f, -3.0f, -0.08f);
-	corpseObj->direction = glm::vec3(0.0f, 1.0f, 0.0f);
-	corpseObj->startTime = gameState.elapsedTime;
-}
-
 // updating corpse
-void gameEngine::corpseHandler::updateCorpse(float  elapsedTime) {
-	if (corpseAnimation) {
-		corpseObj->startTime += elapsedTime;
-		float a = corpseObj->startTime;
+void gameEngine::duckHandler::updateDuck(float elapsedTime) {
+	if (duckAnimation) {
+		duck->startTime += elapsedTime;
+		float a = duck->startTime;
 		a *= 0.6;
-		corpseObj->position = splineFucHandler.evaluateClosedCurve(corpseCurvePoints, corpseCurvePointsTotal, a);
-		corpseObj->direction = -glm::normalize(splineFucHandler.evalClosedCurveFirstDev(corpseCurvePoints, corpseCurvePointsTotal, a));
+		duck->position = splineFucHandler.evaluateClosedCurve(duckCurvePoints, duckCurvePointsTotal, a);
+		glm::vec3 newDirection = -glm::normalize(splineFucHandler.evalClosedCurveFirstDev(duckCurvePoints, duckCurvePointsTotal, a));
+
+		duck->direction = mix(duck->direction, newDirection, 0.1f);
 	}
 }
 
@@ -137,8 +144,8 @@ void gameEngine::restartGame() {
 	gameObjects.camera->elevationAngle = 0.0f;
 
 	// animated obj
-	corpseAnimation = true;
-	m_corpseHandler.createCorpse();
+	duckAnimation = true;
+	m_duckHandler.createDuck();
 
 	// exit from free camera
 	if (gameState.freeCameraMode == true) {
@@ -217,7 +224,7 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 2, -1);
 
-	renderHandler.getDrawHandler().drawCorpse(viewMatrix, projectionMatrix, corpseObj); // draw corpse, v=2
+	renderHandler.getDrawHandler().drawDuck(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["duck"], duck->position, duck->direction); // draw duck, v=2
 	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps); // draw almost all meshes
 
 	if (gameState.drawBanner) {
@@ -300,7 +307,7 @@ void gameEngine::updateObjects(float elapsedTime) {
 	float timeDelta = elapsedTime - gameObjects.camera->currentTime;
 	gameObjects.camera->currentTime = elapsedTime;
 
-	m_corpseHandler.updateCorpse(timeDelta); // new position for corpse
+	m_duckHandler.updateDuck(timeDelta); // new position for duck
 	gameHandler->evalLightIntensity(); // change light intensity with according to game time
 
 	currentColor = mix(currentColor, day, timeDelta);
@@ -423,8 +430,8 @@ void gameEngine::screenHandler::mouseCallback(int buttonPressed, int buttonState
 		);
 		if (objectID == 1) { // sphere
 			gameHandler->changePointLight();
-		} if (objectID == 2) { // corpse
-			corpseAnimation = !corpseAnimation;
+		} if (objectID == 2) { // duck animation
+			duckAnimation = !duckAnimation;
 		} if (objectID == 3) { // boat
 			//createExplosion(boatProps.position);
 		}
@@ -678,6 +685,7 @@ void gameEngine::finalizeApplication() {
 		delete gameObjects.banner;
 		gameObjects.banner = NULL;
 	}
+	delete duck;
 	delete gameHandler;
 	delete waterFBOHandler;
 	renderHandler.cleanupModels();

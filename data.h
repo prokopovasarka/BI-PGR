@@ -69,43 +69,6 @@ typedef struct ObjectProp {
 
 } ObjectProp;
 
-/*
-const ObjectProp maxwellProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(-2.4, -0.36, 1.3),   // position
-		0.7f,						// size
-		1.5f,						// rotation
-		false				       // align
-};
-
-const ObjectProp duckProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(1.4, 1.0, 1.15),   // position
-		0.1f,						// size
-		1.5f,						// rotation
-		false				       // align
-};
-
-const ObjectProp balloonProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(2.5, -0.72, 3.15),   // position
-		0.1f,						// size
-		1.5f,						// rotation
-		false				       // align
-};
-
-const ObjectProp boatProps{
-		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
-		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(-2.5, -0.72, 1.15),   // position
-		1.0f,						// size
-		1.5f,						// rotation
-		false				       // align
-};*/
-
 // amount of points in curve for camera
 const size_t curveSize = 14;
 
@@ -159,17 +122,17 @@ const float explosionVertexData[explosionVertexCount * 5] = {
 };
 
 // amount of points in curve
-const size_t corpseCurvePointsTotal = 6;
+const size_t duckCurvePointsTotal = 6;
+const float radius = 0.2f;
+const float PI = 3.14f;
 // coordinates of points 
-const glm::vec3 corpseCurvePoints[] = {
-	glm::vec3(-2.18f, -2.05f, -0.06f),
-	glm::vec3(-2.27f, -2.13f, -0.08f),
-	glm::vec3(-2.4f, -2.13f, -0.06f),
-	glm::vec3(-2.53f, -2.13f, -0.08f),
-	glm::vec3(-2.64f, -2.01f, -0.06f),
-	glm::vec3(-2.53, -2.07f, -0.08f),
-	glm::vec3(-2.4f, -2.07f, -0.06f),
-	glm::vec3(-2.27f, -2.07f, -0.08f),
+const glm::vec3 duckCurvePoints[] = {
+	glm::vec3(1.4f + radius * cos(0.0f), 1.0f + radius * sin(0.0f), 1.15f),
+	glm::vec3(1.4f + radius * cos(PI / 3), 1.0f + radius * sin(PI / 3), 1.15f),
+	glm::vec3(1.4f + radius * cos(2 * PI / 3), 1.0f + radius * sin(2 * PI / 3), 1.15f),
+	glm::vec3(1.4f + radius * cos(PI), 1.0f + radius * sin(PI), 1.15f),
+	glm::vec3(1.4f + radius * cos(4 * PI / 3), 1.0f + radius * sin(4 * PI / 3), 1.15f),
+	glm::vec3(1.4f + radius * cos(5 * PI / 3), 1.0f + radius * sin(5 * PI / 3), 1.15f),
 };
 
 #endif

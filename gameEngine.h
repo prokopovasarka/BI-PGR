@@ -29,6 +29,7 @@ glm::vec4 currentColor = day;  //current state od daytime
 std::list<Explosion*> explosions; //list of explosions
 
 std::map<std::string, ObjectProp> m_loadProps;
+Object* duck; //duck object
 
 struct GameObjects {
 
@@ -40,7 +41,7 @@ struct GameObjects {
 class gameEngine {
 public:
     gameEngine() {
-        m_corpseHandler = corpseHandler();
+        m_duckHandler = duckHandler();
         m_screenHandler = screenHandler();
         m_keyBoardHandler = keyBoardHandler();
     }
@@ -54,10 +55,10 @@ public:
     void createMenu(void);
     static void finalizeApplication();
 
-    struct corpseHandler {
+    struct duckHandler {
     public:
-        void createCorpse();
-        void updateCorpse(float elapsedTime);
+        void createDuck();
+        void updateDuck(float elapsedTime);
     };
 
     struct screenHandler {
@@ -83,7 +84,7 @@ public:
     void restartGame();
 
 private:
-    corpseHandler m_corpseHandler;
+    duckHandler m_duckHandler;
     screenHandler m_screenHandler;
     keyBoardHandler m_keyBoardHandler;
     static cameraHandler camHandler;
