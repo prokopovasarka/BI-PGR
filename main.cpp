@@ -218,7 +218,7 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	glStencilFunc(GL_ALWAYS, 2, -1);
 
 	renderHandler.getDrawHandler().drawCorpse(viewMatrix, projectionMatrix, corpseObj); // draw corpse, v=2
-	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater); // draw almost all meshes
+	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps); // draw almost all meshes
 
 	if (gameState.drawBanner) {
 		if (gameObjects.banner == NULL) {
@@ -448,7 +448,8 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 		exit(0);
 #endif
 		break;
-	case 'r': // restart game
+	case 'r': // restart game & load data from config
+		gameHandler->initializeApplication();
 		gameHandler->restartGame();
 		break;
 	case 'c': // switch camera
@@ -628,6 +629,7 @@ void gameEngine::createMenu(void) {
 
 // Called after the window and OpenGL are initialized. Called exactly once, before the main loop.
 void gameEngine::initializeApplication() {
+	m_loadProps = loadConfig(CONFIG_PATH); //load data from config to map - only for restart
 
 	glutDisplayFunc(m_screenHandler.displayCallback);
 	// register callback for change of window size

@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="configLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="render_stuff.cpp" />
     <ClCompile Include="setUni.cpp" />
@@ -20,6 +21,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="configLoader.h" />
     <ClInclude Include="data.h" />
     <ClInclude Include="gameEngine.h" />
     <ClInclude Include="model.h" />

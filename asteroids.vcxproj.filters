@@ -37,6 +37,9 @@
     <ClCompile Include="water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="configLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data.h">
@@ -64,6 +67,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utilStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="configLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

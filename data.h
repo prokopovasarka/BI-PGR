@@ -69,11 +69,11 @@ typedef struct ObjectProp {
 
 } ObjectProp;
 
-
+/*
 const ObjectProp maxwellProps{
 		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
 		glm::vec3(0.0, 0.0, 0.0),      // not using
-		glm::vec3(-2.4, 1.0, 1.15),   // position
+		glm::vec3(-2.4, -0.36, 1.3),   // position
 		0.7f,						// size
 		1.5f,						// rotation
 		false				       // align
@@ -87,6 +87,24 @@ const ObjectProp duckProps{
 		1.5f,						// rotation
 		false				       // align
 };
+
+const ObjectProp balloonProps{
+		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
+		glm::vec3(0.0, 0.0, 0.0),      // not using
+		glm::vec3(2.5, -0.72, 3.15),   // position
+		0.1f,						// size
+		1.5f,						// rotation
+		false				       // align
+};
+
+const ObjectProp boatProps{
+		glm::vec3(1.0, 0.0, 0.0),     // rotation axis
+		glm::vec3(0.0, 0.0, 0.0),      // not using
+		glm::vec3(-2.5, -0.72, 1.15),   // position
+		1.0f,						// size
+		1.5f,						// rotation
+		false				       // align
+};*/
 
 // amount of points in curve for camera
 const size_t curveSize = 14;

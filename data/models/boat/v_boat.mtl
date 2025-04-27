@@ -1,0 +1,11 @@
+# Blender MTL File: 'v_boat.blend'
+# Material Count: 1
+
+newmtl None
+Ns 0
+Ka 0.000000 0.000000 0.000000
+Kd 0.6 0.6 0.6
+Ks 0.2 0.2 0.2
+d 1
+illum 2
+map_Kd wood.jpg

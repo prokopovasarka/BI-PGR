@@ -3,6 +3,10 @@
 #include "pgr.h"
 #include "render_stuff.h"
 #include "camera.h"
+#include "configLoader.h"
+
+// path to config.txt
+const char* CONFIG_PATH = "data/config.txt";
 
 extern SCommonShaderProgram shaderProgram;  // main shader
 extern SCommonShaderProgram waterShader;  // water shader
@@ -23,6 +27,8 @@ float teleportSpeed = 0.2;
 glm::vec4 day = glm::vec4(0.95f, 0.95f, 0.85f, 1.0f);
 glm::vec4 currentColor = day;  //current state od daytime
 std::list<Explosion*> explosions; //list of explosions
+
+std::map<std::string, ObjectProp> m_loadProps;
 
 struct GameObjects {
 

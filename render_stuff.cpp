@@ -7,10 +7,6 @@
  *
 */
 //-----------------------------------------------------------------------------------------
-
-#include <iostream>
-#include <string>
-#include "pgr.h"
 #include "render_stuff.h"
 
 GLint SQUARES_AMOUNT = 500;  // amount of squares
@@ -30,6 +26,8 @@ MeshGeometry* sphereGeometry = NULL;
 // more meshes
 std::vector<MeshGeometry*> maxwellGeometry;
 std::vector<MeshGeometry*> duckGeometry;
+std::vector<MeshGeometry*> balloonGeometry;
+std::vector<MeshGeometry*> boatGeometry;
 
 // paths to textures
 const char* SKYBOX_CUBE_TEXTURE_FILE_PREFIX = "data/skybox/skybox";
@@ -44,7 +42,8 @@ const char* MAXWELL_MODEL_PATH = "data/models/maxwell/maxwell.obj";
 const char* GRASS_TEXTURE_PATH = "data/textures/plant.png";
 const char* SPHERE_MODEL_PATH = "data/models/icosphere.obj";
 const char* DUCK_MODEL_PATH = "data/models/duck/duck.obj";
-
+const char* BALLOON_MODEL_PATH = "data/models/balloons/balloon.obj";
+const char* BOAT_MODEL_PATH = "data/models/boat/v_boat.obj";
 
 //textures
 GLuint grassTexture;
@@ -57,7 +56,6 @@ glm::vec3 cube2Position = glm::vec3(3.0f, -0.42f, 1.2f);
 glm::vec3 cube3Position = glm::vec3(2.4f, -0.82f, 1.2f);
 glm::vec3 spherePosition = glm::vec3(2.15, -2.72, 1.42);
 glm::vec3 housePosition = glm::vec3(2.0, -2.8, 1.5);
-glm::vec3 plateauPosition = glm::vec3(2.0, -2.8, 0.0);
 
 // shaders
 skyboxFarPlaneShaderProgram  skyboxShader;
@@ -696,6 +694,12 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	if (loadSingleMesh(SPHERE_MODEL_PATH, shaderProgram, &sphereGeometry) != true) {
 		std::cerr << "initializeModels(): sphere model loading failed." << std::endl;
 	}
+	if (loadMesh(BALLOON_MODEL_PATH, shaderProgram, &balloonGeometry) != true) {
+		std::cerr << "initializeModels(): balloon model loading failed." << std::endl;
+	}
+	if (loadMesh(BOAT_MODEL_PATH, shaderProgram, &boatGeometry) != true) {
+		std::cerr << "initializeModels(): balloon model loading failed." << std::endl;
+	}
 }
 
 // initialize banner geometry
@@ -757,11 +761,6 @@ void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const g
 	glBindVertexArray(0);
 	glUseProgram(0);
 	return;
-}
-
-// draw platform model
-void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix) {
-
 }
 
 // draw cube model
@@ -876,7 +875,7 @@ void renderObjects::drawHandler::drawExplosion(const glm::mat4& viewMatrix, cons
 }
 
 // draw all models and animations
-void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool) {
+void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps) {
 	glEnable(GL_STENCIL_TEST);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	//glStencilFunc(GL_ALWAYS, 0, -1);
@@ -885,8 +884,10 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cubePosition, 8.0f);
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube2Position, 3.0f);
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube3Position, 11.0f);
-	drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, maxwellProps);
-	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, duckProps);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell"]);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck"]);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &balloonGeometry, gameUniVars, loadProps["balloon"]);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &boatGeometry, gameUniVars, loadProps["boat"]);
 	drawHouse(viewMatrix, projectionMatrix, shaderProgram, &houseGeometry, gameUniVars, housePosition);
 	glStencilFunc(GL_ALWAYS, 1, -1);
 	drawSphere(viewMatrix, projectionMatrix, shaderProgram, &sphereGeometry, gameUniVars, spherePosition);
@@ -935,6 +936,14 @@ void renderObjects::cleanupModels() {
 		cleanupGeometry(*it);
 	}
 	v = duckGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
+	v = balloonGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
+	v = boatGeometry;
 	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
 		cleanupGeometry(*it);
 	}

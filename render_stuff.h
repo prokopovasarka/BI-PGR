@@ -10,11 +10,18 @@
 #ifndef __RENDER_STUFF_H
 #define __RENDER_STUFF_H
 
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
+#include <glm/glm.hpp>
+#include "pgr.h"
 #include "utilStructures.h"
 #include "setUni.h"
 #include "spline.h"
 #include "water.h"
 #include "model.h"
+
 
 class renderObjects {
 public:
@@ -62,9 +69,7 @@ public:
 			std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, ObjectProp param);
 		void drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
 			MeshGeometry** geometry, GameUniformVariables gameUni);
-		void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, 
-			GameUniformVariables gameUni, const glm::mat4& projectionMatrix);
-		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool);
+		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps);
 		void drawCorpse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Object* corpse);
 		void drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion);
 		void drawBanner(Object* banner, const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
