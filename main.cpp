@@ -103,16 +103,20 @@ void gameEngine::duckHandler::updateDuck(float elapsedTime) {
 
 // changing light 
 void gameEngine::evalLightIntensity() {
+	const float cycleDuration = 120.0f; // 120 second loop
 
-	int time = int(gameState.elapsedTime * 1000) % (60 * 1000);
-	float new_time = float(time) / 1000;
-	if (new_time < 60 / 2) { 
-		new_time = (new_time / (60 / 2));
+	float timeInCycle = fmod(gameState.elapsedTime, cycleDuration);
+
+	float phase;
+	if (timeInCycle < cycleDuration / 2.0f) {
+		phase = timeInCycle / (cycleDuration / 2.0f);  // 0 -> 1
 	}
-	else { 
-		new_time = ((60 - new_time) / (60 / 2));
+	else {
+		phase = (cycleDuration - timeInCycle) / (cycleDuration / 2.0f); // 1 -> 0
 	}
-	gameUniVars.lightIntensity = 1 - new_time;
+
+	// change light
+	gameUniVars.lightIntensity = glm::mix(-1.20f, 0.9f, phase);
 
 }
 
@@ -233,26 +237,7 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	//update loading bar
 	renderHandler.getDrawHandler().drawBanner(viewMatrix, projectionMatrix, loadingBarWidth);
 
-	if (gameState.drawBanner) {
-		if (gameObjects.banner == NULL) {
-			gameObjects.banner = gameHandler->createBanner();
-		}
-		else {
-			if (!gameState.freeCameraMode) {
-				//renderHandler.getDrawHandler().drawBanner(gameObjects.banner, orthoViewMatrix, orthoProjectionMatrix);
-			}
-			else {
-				gameState.drawBanner = false;
-			}
-			
-		}	
-		float time = (gameObjects.banner->currentTime - gameObjects.banner->startTime);
-		float f = (glm::floor(time * 0.05f) - time * 0.05f) * 4 + 1.0;
 
-		if (f < -2.988400f) {
-			gameState.drawBanner = false;
-		}
-	}
 	glDisable(GL_STENCIL_TEST);
 	// create explosion
 	std::list <Explosion*> ::iterator it;
@@ -323,9 +308,9 @@ void gameEngine::updateObjects(float elapsedTime) {
 	if (gameState.curveMotion == true) { // show spline motion
 		gameObjects.camera->startTime += timeDelta;
 		float a = gameObjects.camera->startTime;
-		a *= 0.6;
-		gameObjects.camera->position = splineFucHandler.evaluateClosedCurve(curveData, curveSize, a);
-		gameObjects.camera->direction = glm::normalize(splineFucHandler.evalClosedCurveFirstDev(curveData, curveSize, a));
+		a *= 0.1;
+		gameObjects.camera->position = splineFucHandler.evaluateMovementCurve(curveData, curveSize, a);
+		gameObjects.camera->direction = glm::normalize(splineFucHandler.evalMovementCurveFirstDev(curveData, curveSize, a));
 	}
 	else {// normal camera static/free
 		glm::vec3 new_position = gameObjects.camera->position + timeDelta * gameObjects.camera->speed * gameObjects.camera->direction;
@@ -387,10 +372,10 @@ void gameEngine::screenHandler::timerCallback(int) {
 	}
 	if (gameState.drawBanner == true ) {
 		if (gameObjects.banner == NULL) {
-			gameObjects.banner = gameHandler->createBanner();
+			//gameObjects.banner = gameHandler->createBanner();
 		}
 		else {
-			gameObjects.banner->currentTime = gameState.elapsedTime;
+			//gameObjects.banner->currentTime = gameState.elapsedTime;
 		}
 	}
 	// update objects in the scene
@@ -441,7 +426,7 @@ void gameEngine::screenHandler::mouseCallback(int buttonPressed, int buttonState
 		} if (objectID == 2) { // duck animation
 			duckAnimation = !duckAnimation;
 		} if (objectID == 3) { // boat
-			//createExplosion(boatProps.position);
+			createExplosion(m_loadProps["maxwell"].position);
 		}
 	}
 	if ((buttonPressed == GLUT_RIGHT_BUTTON) && (buttonState == GLUT_DOWN)) {
@@ -509,12 +494,12 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 		gameUniVars.isFog = !gameUniVars.isFog;
 		break;
 	case 'b': //shows banner if camera is static
-		if (gameObjects.banner == NULL) {
+		/*if (gameObjects.banner == NULL) {
 			gameObjects.banner = gameHandler->createBanner();
 		}
 		if (!gameState.freeCameraMode) {
 			gameState.drawBanner = true;
-		}
+		}*/
 		break;
 	case 'w':
 		camHandler.moveCamUp(gameObjects.camera, 0.3f);
@@ -603,7 +588,7 @@ void gameEngine::gameMenu(int choice) {
 		break;
 	case 4:
 		// explosion
-		//createExplosion(boatProps.position);
+		createExplosion(m_loadProps["maxwell"].position);
 		break;
 	case 5:
 		// sphere light intensity

@@ -74,27 +74,27 @@ const size_t curveSize = 14;
 
 // curve points for camera
 const glm::vec3 curveData[] = {
-	 glm::vec3(0.00, -2.0, 0.0),
+	 glm::vec3(0.00, -2.0, 1.3),
 
-	 glm::vec3(0.8, -1.65, 0.2),
+	 glm::vec3(0.8, -1.65, 1.5),
 
-	 glm::vec3(1.2, -1.3, 0.6),
-	 glm::vec3(1.2, -0.6, 0.8),
-	 glm::vec3(1.2, 0.1, 0.6),
-	 glm::vec3(1.2, 0.8, 0.4),
+	 glm::vec3(1.2, -1.3, 1.7),
+	 glm::vec3(1.2, -0.6, 1.8),
+	 glm::vec3(1.2, 0.1, 1.7),
+	 glm::vec3(1.2, 0.8, 1.5),
 
-	 glm::vec3(0.8, 1.15, 0.2),
+	 glm::vec3(0.8, 1.15, 1.3),
 
-	 glm::vec3(0.0, 1.5, 0.0),
+	 glm::vec3(0.0, 1.5, 1.2),
 
-	 glm::vec3(-0.8, 1.15, 0.2),
+	 glm::vec3(-0.8, 1.15, 1.3),
 
-	 glm::vec3(-1.2, 0.8, 0.4),
-	 glm::vec3(-1.2, 0.1, 0.6),
-	 glm::vec3(-1.2, -0.6, 0.8),
-	 glm::vec3(-1.2, -1.3, 0.4),
+	 glm::vec3(-1.2, 0.8, 1.2),
+	 glm::vec3(-1.2, 0.1, 1.4),
+	 glm::vec3(-1.2, -0.6, 1.6),
+	 glm::vec3(-1.2, -1.3, 1.3),
 
-	 glm::vec3(-0.8, -1.65, 0.0),
+	 glm::vec3(-0.8, -1.65, 1.2),
 
 };
 // amount of vertices for banner

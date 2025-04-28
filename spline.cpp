@@ -39,7 +39,7 @@ glm::mat4 splineHandler::alignObject(const glm::vec3& position, const glm::vec3&
     return matrix;
 }
 
-// evalucate one segment of the curve
+// evalucate one segment of the curve for duck movement
 glm::vec3 splineHandler::evaluateCurveSegment(const glm::vec3 points[], const float t) {
 
 	float t2 = t * t;
@@ -61,7 +61,7 @@ glm::vec3 splineHandler::evaluateCurveSegment(const glm::vec3 points[], const fl
 	return res;
 }
 
-// evaluate first derivative of one segment
+// evaluate first derivative of one segment for duck movement
 glm::vec3 splineHandler::evalCurveSegFirstDev(const glm::vec3 points[], const float t) {
 	float t2 = t * t;
 	glm::vec4 ts(3 * t2, 2 * t, 1, 0);
@@ -81,7 +81,7 @@ glm::vec3 splineHandler::evalCurveSegFirstDev(const glm::vec3 points[], const fl
 	return res;
 }
 
-// evaluate all parts of the curve
+// evaluate all parts of the curve for duck movemenet
 glm::vec3 splineHandler::evaluateClosedCurve(const glm::vec3 points[], const size_t count, const float t) {
 	glm::vec3 result(0.0, 0.0, 0.0);
 
@@ -98,7 +98,7 @@ glm::vec3 splineHandler::evaluateClosedCurve(const glm::vec3 points[], const siz
 	return result;
 }
 
- // evaluate first derivate of the whole curve
+ // evaluate first derivate of the whole curve for duck movement
 glm::vec3 splineHandler::evalClosedCurveFirstDev(const glm::vec3 points[], const size_t count, const float t) {
 	int i = (int)(t*count);
 	glm::vec3 newPoints[4];
@@ -108,4 +108,84 @@ glm::vec3 splineHandler::evalClosedCurveFirstDev(const glm::vec3 points[], const
 	newPoints[3] = points[(i + 2) % count];
 	glm::vec3 result = evalCurveSegFirstDev( newPoints, t - i );
 	return -result;
+}
+
+// SPLINE FOR MOVEMENT OF CAM - HERMITE SPLINE
+
+// Hermite interpolation between two points
+static glm::vec3 hermite(const glm::vec3& p0, const glm::vec3& m0, const glm::vec3& p1, const glm::vec3& m1, float t) {
+	float t2 = t * t;
+	float t3 = t2 * t;
+
+	float h00 = 2.0f * t3 - 3.0f * t2 + 1.0f;
+	float h10 = t3 - 2.0f * t2 + t;
+	float h01 = -2.0f * t3 + 3.0f * t2;
+	float h11 = t3 - t2;
+
+	return h00 * p0 + h10 * m0 + h01 * p1 + h11 * m1;
+}
+
+// Derivative of Hermite interpolation
+static glm::vec3 hermiteDerivative(const glm::vec3& p0, const glm::vec3& m0, const glm::vec3& p1, const glm::vec3& m1, float t) {
+	float t2 = t * t;
+
+	float dh00 = 6.0f * t2 - 6.0f * t;
+	float dh10 = 3.0f * t2 - 4.0f * t + 1.0f;
+	float dh01 = -6.0f * t2 + 6.0f * t;
+	float dh11 = 3.0f * t2 - 2.0f * t;
+
+	return dh00 * p0 + dh10 * m0 + dh01 * p1 + dh11 * m1;
+}
+
+// Calculate tangent as half vector between neighbors
+static glm::vec3 calcTangent(const glm::vec3& prev, const glm::vec3& next) {
+	return 0.5f * (next - prev);
+}
+
+glm::vec3 splineHandler::evaluateMovementCurve(const glm::vec3 points[], const size_t count, const float t) {
+    if (count < 2) {
+        return glm::vec3(0.0f);
+    }
+
+    float total = (float)count;
+    float scaledT = t * total;
+    int i = (int)scaledT;
+    float localT = scaledT - i;
+
+    int i0 = i % count;
+    int i1 = (i + 1) % count;
+    int iPrev = (i - 1 + count) % count;
+    int iNext = (i + 2) % count;
+
+    glm::vec3 p0 = points[i0];
+    glm::vec3 p1 = points[i1];
+
+    glm::vec3 m0 = calcTangent(points[iPrev], p1);
+    glm::vec3 m1 = calcTangent(p0, points[iNext]);
+
+    return hermite(p0, m0, p1, m1, localT);
+}
+
+glm::vec3 splineHandler::evalMovementCurveFirstDev(const glm::vec3 points[], const size_t count, const float t) {
+	if (count < 2) {
+		return glm::vec3(0.0f);
+	}
+
+	float total = (float)count;
+	float scaledT = t * total;
+	int i = (int)scaledT;
+	float localT = scaledT - i;
+
+	int i0 = i % count;
+	int i1 = (i + 1) % count;
+	int iPrev = (i - 1 + count) % count;
+	int iNext = (i + 2) % count;
+
+	glm::vec3 p0 = points[i0];
+	glm::vec3 p1 = points[i1];
+
+	glm::vec3 m0 = calcTangent(points[iPrev], p1);
+	glm::vec3 m1 = calcTangent(p0, points[iNext]);
+
+	return hermiteDerivative(p0, m0, p1, m1, localT);
 }

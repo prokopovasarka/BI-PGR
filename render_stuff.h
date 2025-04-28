@@ -37,7 +37,6 @@ public:
 		bool loadSingleMesh(const std::string& fileName, SCommonShaderProgram& shader, MeshGeometry** geometry);
 		bool loadMesh(const std::string& fileName, SCommonShaderProgram& shader, std::vector<MeshGeometry*>* geometryFull);
 		void initMaterial(MeshGeometry** geometry, Material material);
-		void initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry);
 		void initBannerGeometry(GLuint shader, MeshGeometry** geometry);
 		void initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry** geometry);
 		void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry, waterBufferMaker* waterFBOHandler);
@@ -75,8 +74,6 @@ public:
 		void drawBanner(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth);
 		void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
 			MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition);
-		void drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
-			MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 plateauPosition);
 		void drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry);
 	};
 

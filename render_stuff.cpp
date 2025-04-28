@@ -475,11 +475,6 @@ void renderObjects::initHandler::initSkyboxGeometry(skyboxFarPlaneShaderProgram 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-// initialize model VAO VBO
-void renderObjects::initHandler::initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry) {
-
-}
-
 // initialize all shaders
 void renderObjects::initHandler::initializeShaderPrograms() {
 
@@ -688,7 +683,25 @@ void renderObjects::initHandler::initWater(SCommonShaderProgram& shader, MeshGeo
 
 // initialize explosion
 void renderObjects::initHandler::initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geometry) {
+	*geometry = new MeshGeometry;
 
+	glGenVertexArrays(1, &((*geometry)->vertexArrayObject));
+	glBindVertexArray((*geometry)->vertexArrayObject);
+	CHECK_GL_ERROR();
+
+	glGenBuffers(1, &((*geometry)->vertexBufferObject));
+	glBindBuffer(GL_ARRAY_BUFFER, (*geometry)->vertexBufferObject);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(explosionVertexData), explosionVertexData, GL_STATIC_DRAW);
+
+	(*geometry)->texture = pgr::createTexture(EXPLOSION_TEXTURE_PATH);
+
+	glEnableVertexAttribArray(explosionShader.posLocation);
+	glVertexAttribPointer(explosionShader.posLocation, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), 0);
+	glEnableVertexAttribArray(explosionShader.texCoordLocation);
+	glVertexAttribPointer(explosionShader.texCoordLocation, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	glBindVertexArray(0);
+	(*geometry)->numTriangles = explosionVertexCount;
 }
 
 // initialize all models
@@ -698,6 +711,7 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	waterFBOHandler->setDudvMapTex(pgr::createTexture(DUDV_MAP));
 	initWater(waterShader, &waterGeometry, waterFBOHandler);
 	initBannerGeometry(barShaderProgram.program, &bannerGeometry);
+	initExplosion(explosionShader, &explosionGeometry);
 	if (loadSingleMesh(TOWER_MODEL_PATH, shaderProgram, &towerGeometry) != true) {
 		std::cerr << "initializeModels(): tower model loading failed." << std::endl;
 	}
@@ -931,11 +945,6 @@ void renderObjects::drawHandler::drawHouse(const glm::mat4& viewMatrix, const gl
 	return;
 }
 
-// draw plateau model
-void renderObjects::drawHandler::drawPlateau(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 plateauPosition) {
-	
-}
-
 // draw duck
 void renderObjects::drawHandler::drawDuck(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir) {
 	glUseProgram(shaderProgram.program);
@@ -957,12 +966,41 @@ void renderObjects::drawHandler::drawDuck(const glm::mat4& viewMatrix, const glm
 
 // draw explosion method for animation
 void renderObjects::drawHandler::drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry) {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glUseProgram(explosionShader.program);
 
-	
+	glm::mat4 matrix = glm::translate(glm::mat4(1.0f), explosion->position);
+	matrix = glm::scale(matrix, glm::vec3(1.0) * explosion->size);
+
+	glm::mat4 rotationMatrix = glm::mat4(
+		viewMatrix[0],
+		viewMatrix[1],
+		viewMatrix[2],
+		glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)
+	);
+	matrix = matrix * glm::transpose(rotationMatrix);
+
+	glm::mat4 PVMmatrix = projectionMatrix * viewMatrix * matrix;
+
+	glUniform1i(explosionShader.texSamplerLocation, 0);
+	glUniform1f(explosionShader.frameDurationLocation, explosion->frameDuration);
+	glUniformMatrix4fv(explosionShader.VmatrixLocation, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+	glUniformMatrix4fv(explosionShader.PVMmatrixLocation, 1, GL_FALSE, glm::value_ptr(PVMmatrix));
+	glUniform1f(explosionShader.timeLocation, explosion->currentTime - explosion->startTime);
+
+	glBindVertexArray((*geometry)->vertexArrayObject);
+	glBindTexture(GL_TEXTURE_2D, (*geometry)->texture);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, (*geometry)->numTriangles);
+	glBindVertexArray(0);
+
+	glUseProgram(0);
+	glDisable(GL_BLEND);
 }
 
 // draw explosion
 void renderObjects::drawHandler::drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion) {
+	drawExplosionMet(viewMatrix, projectionMatrix, explosionShader, explosion, &explosionGeometry);
 }
 
 // draw all models and animations
@@ -997,8 +1035,9 @@ void renderObjects::cleanupShaderPrograms(void) {
 	pgr::deleteProgramAndShaders(shaderProgram.program);
 	pgr::deleteProgramAndShaders(skyboxShader.program);
 	pgr::deleteProgramAndShaders(waterShader.program);
-	pgr::deleteProgramAndShaders(explosionShader.program);
 	pgr::deleteProgramAndShaders(bannerShaderProgram.program);
+	pgr::deleteProgramAndShaders(explosionShader.program);
+	pgr::deleteProgramAndShaders(barShaderProgram.program);
 
 }
 

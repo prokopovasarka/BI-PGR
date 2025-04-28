@@ -32,5 +32,8 @@ public:
 		const float     t
 	);
 
+	glm::vec3 splineHandler::evalMovementCurveFirstDev(const glm::vec3 points[], const size_t count, const float t);
+	glm::vec3 splineHandler::evaluateMovementCurve(const glm::vec3 points[], const size_t count, const float t);
+
 };
 #endif

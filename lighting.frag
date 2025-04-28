@@ -160,6 +160,13 @@ void main() {
 			color_f += spotLightEval(cameraReflector, material, vertexPosition, vertexNormal);
 		}
 
+		color_f.rgb *= (0.3 + 0.7 * lightIntensity); // day to night
+
+		vec3 nightColorTint = vec3(0.3, 0.3, 0.4); // tmavì modrá
+		color_f.rgb = mix(nightColorTint, color_f.rgb, lightIntensity);
+
+		color_f.w = 1.0;
+
 		//using two textures
 		if (material.useTexture && secTexture){
 			vec4 tex0, tex1, res;
