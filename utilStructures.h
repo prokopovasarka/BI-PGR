@@ -32,6 +32,7 @@ typedef struct MeshGeometry {
 typedef struct Object {
 	glm::vec3 position;
 	glm::vec3 direction;
+	glm::vec3 origPos;
 	float	  angle;
 	float     speed;
 	float     size;
@@ -137,6 +138,7 @@ typedef struct _gameState {
 	float elapsedTime;          // game time
 	bool curveMotion;           // switch to spline motion
 	bool isCloudy;
+	bool blowMaxwell;
 
 } GameState;
 

@@ -42,7 +42,23 @@ void gameEngine::duckHandler::createDuck() {
 	newDuck->startTime = gameState.elapsedTime;
 	newDuck->currentTime = newDuck->startTime;
 
-	duck = newDuck;
+	gameObjects.duck = newDuck;
+}
+
+void gameEngine::maxwellHandler::createMaxwell() {
+	Object* newMaxwell = new Object;
+
+	newMaxwell->position = m_loadProps["maxwell"].position;
+	newMaxwell->direction = m_loadProps["maxwell"].front;
+	newMaxwell->origPos = m_loadProps["maxwell"].position;
+	newMaxwell->size = m_loadProps["maxwell"].size;
+	newMaxwell->angle = m_loadProps["maxwell"].size;
+
+	newMaxwell->destroyed = false;
+	newMaxwell->startTime = gameState.elapsedTime;
+	newMaxwell->currentTime = newMaxwell->startTime;
+
+	gameObjects.maxwellObj = newMaxwell;
 }
 
 //----------------------------------------------------------INTERACTION WITH OBJECTS------------------------------------------------------
@@ -55,13 +71,13 @@ void createExplosion(glm::vec3 position) {
 	newExplosion->startTime = gameState.elapsedTime;
 	newExplosion->currentTime = newExplosion->startTime;
 
-	newExplosion->size = 0.3;
-	newExplosion->direction = glm::vec3(0.0f, 0.0f, 1.0f);
+	newExplosion->size = 0.5;
+	newExplosion->direction = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	newExplosion->frameDuration = 0.02f;
 	newExplosion->frames = 84;
 
-	newExplosion->position = position;
+	newExplosion->position = glm::vec3(position.x+0.6, position.y-0.3, position.z);
 	newExplosion->end = newExplosion->startTime + newExplosion->frames * newExplosion->frameDuration;
 
 	explosions.push_back(newExplosion);
@@ -73,17 +89,33 @@ void controlExplosion(Explosion* explosion) {
 		explosion->destroyed = true;
 }
 
-// updating corpse
+// updating duck
 void gameEngine::duckHandler::updateDuck(float elapsedTime) {
 	if (duckAnimation) {
-		duck->startTime += elapsedTime;
-		float a = duck->startTime;
+		gameObjects.duck->startTime += elapsedTime;
+		float a = gameObjects.duck->startTime;
 		a *= 0.6;
-		duck->position = splineFucHandler.evaluateClosedCurve(duckCurvePoints, duckCurvePointsTotal, a);
+		gameObjects.duck->position = splineFucHandler.evaluateClosedCurve(duckCurvePoints, duckCurvePointsTotal, a);
 		glm::vec3 newDirection = -glm::normalize(splineFucHandler.evalClosedCurveFirstDev(duckCurvePoints, duckCurvePointsTotal, a));
 
-		duck->direction = mix(duck->direction, newDirection, 0.1f);
+		gameObjects.duck->direction = mix(gameObjects.duck->direction, newDirection, 0.1f);
 	}
+}
+
+//update maxwell rotation
+void gameEngine::maxwellHandler::updateMaxwell(float deltaTime) {
+
+	float heightOffset = 1.5f;  // height
+	float range = 0.2f;  // range
+
+	// movement
+	float newHeight = range * sin(gameObjects.maxwellObj->currentTime) + heightOffset;
+
+	// newposition
+	gameObjects.maxwellObj->position.z = newHeight;
+
+	// update time
+	gameObjects.maxwellObj->currentTime += deltaTime;
 }
 
 // changing light 
@@ -138,6 +170,7 @@ void gameEngine::restartGame() {
 	// animated obj
 	duckAnimation = true;
 	m_duckHandler.createDuck();
+	m_maxwellHandler.createMaxwell();
 
 	// exit from free camera
 	if (gameState.freeCameraMode == true) {
@@ -216,7 +249,11 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 2, -1);
 
-	renderHandler.getDrawHandler().drawDuck(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["duck"], duck->position, duck->direction); // draw duck, v=2
+	renderHandler.getDrawHandler().drawDuck(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["duck"], gameObjects.duck->position, gameObjects.duck->direction); // draw duck, v=2
+	glDisable(GL_STENCIL_TEST);
+	glStencilFunc(GL_ALWAYS, 3, -1);
+	renderHandler.getDrawHandler().drawMaxwell(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["maxwell"], gameObjects.maxwellObj->position, gameObjects.maxwellObj->direction); //draw maxwell
+	glDisable(GL_STENCIL_TEST);
 	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps); // draw almost all meshes
 
 	//update loading bar
@@ -329,6 +366,11 @@ void gameEngine::updateObjects(float elapsedTime) {
 			++it;
 		}
 	}
+
+	//blow him after explosion
+	if (gameState.blowMaxwell) {
+		m_maxwellHandler.updateMaxwell(timeDelta); //new movement for maxwell
+	}
 	
 	// set color
 	glClearColor(currentColor.x, currentColor.y, currentColor.z, 1);
@@ -406,7 +448,14 @@ void gameEngine::screenHandler::mouseCallback(int buttonPressed, int buttonState
 		} if (objectID == 2) { // duck animation
 			duckAnimation = !duckAnimation;
 		} if (objectID == 3) { // boat
-			createExplosion(m_loadProps["maxwell"].position);
+			gameState.blowMaxwell = !gameState.blowMaxwell;
+			if (gameState.blowMaxwell) {
+				gameObjects.maxwellObj->currentTime = 0.0;
+				createExplosion(m_loadProps["maxwell"].position);
+			}
+			else {
+				gameObjects.maxwellObj->position = gameObjects.maxwellObj->origPos;
+			}
 		}
 	}
 	if ((buttonPressed == GLUT_RIGHT_BUTTON) && (buttonState == GLUT_DOWN)) {
@@ -562,14 +611,35 @@ void gameEngine::gameMenu(int choice) {
 		gameUniVars.isFog = !gameUniVars.isFog;
 		break;
 	case 4:
-		// explosion
-		createExplosion(m_loadProps["maxwell"].position);
+		// change cloudy weather
+		gameState.isCloudy = !gameState.isCloudy;
 		break;
 	case 5:
+		// explosion with blowing maxwell
+		if (!gameState.blowMaxwell) {
+			gameState.blowMaxwell = !gameState.blowMaxwell;
+			if (gameState.blowMaxwell) {
+				gameObjects.maxwellObj->currentTime = 0.0;
+				createExplosion(m_loadProps["maxwell"].position);
+			}
+		}
+		break;
+	case 6:
+		//chill maxwell to static position
+		if (gameState.blowMaxwell) {
+			gameState.blowMaxwell = !gameState.blowMaxwell;
+			gameObjects.maxwellObj->position = gameObjects.maxwellObj->origPos;
+		}
+		break;
+	case 7:
 		// sphere light intensity
 		gameHandler->changePointLight();
 		break;
-	case 6:
+	case 8:
+		gameHandler->initializeApplication();
+		gameHandler->restartGame();
+		break;
+	case 9:
 		glutLeaveMainLoop();
 		break;
 	}
@@ -578,25 +648,32 @@ void gameEngine::gameMenu(int choice) {
 
 // Function generating simple menu
 void gameEngine::createMenu(void) {
-	int menu = glutCreateMenu(gameMenu);
+	if (controlMenu) {
+		glutDestroyMenu(controlMenu);  // destroy if exists
+	}
+
+	controlMenu = glutCreateMenu(gameMenu);
 
 	int cameraSubmenu = glutCreateMenu(gameMenu);
 	glutAddMenuEntry("Static cam 1", 0);
 	glutAddMenuEntry("Static cam 2", 1);
 	glutAddMenuEntry("Free cam", 2);
 
-	int fogSubmenu = glutCreateMenu(gameMenu);
-	glutAddMenuEntry("ON/OFF", 3);
+	int weatherSubmenu = glutCreateMenu(gameMenu);
+	glutAddMenuEntry("ON/OFF Fog", 3);
+	glutAddMenuEntry("ON/OFF Cloudy weather", 4);
 
 	int clickSubmenu = glutCreateMenu(gameMenu);
-	glutAddMenuEntry("Boat", 4);
-	glutAddMenuEntry("Light", 5);
+	glutAddMenuEntry("Blow Maxwell Up", 5);
+	glutAddMenuEntry("Pet Maxwell", 6);
+	glutAddMenuEntry("Light", 7);
 
 	glutCreateMenu(gameMenu);
 	glutAddSubMenu("Camera", cameraSubmenu);
-	glutAddSubMenu("Fog", fogSubmenu);
+	glutAddSubMenu("Weather", weatherSubmenu);
 	glutAddSubMenu("Actions", clickSubmenu);
-	glutAddMenuEntry("Exit", 6);
+	glutAddMenuEntry("Restart", 8);
+	glutAddMenuEntry("Exit", 9);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
@@ -652,7 +729,7 @@ void gameEngine::finalizeApplication() {
 
 	delete gameObjects.camera;
 	gameObjects.camera = NULL;
-	delete duck;
+	delete gameObjects.duck;
 	delete gameHandler;
 	delete waterFBOHandler;
 	renderHandler.cleanupModels();

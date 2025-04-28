@@ -30,11 +30,12 @@ glm::vec4 currentColor = day;  //current state od daytime
 std::list<Explosion*> explosions; //list of explosions
 
 std::map<std::string, ObjectProp> m_loadProps;
-Object* duck; //duck object
 
 struct GameObjects {
 
     Camera* camera; //camera object
+    Object* duck; //duck object
+    Object* maxwellObj; //maxwell object
 
 } gameObjects;
 
@@ -58,6 +59,12 @@ public:
     public:
         void createDuck();
         void updateDuck(float elapsedTime);
+    };
+
+    struct maxwellHandler {
+    public:
+        void createMaxwell();
+        void updateMaxwell(float elapsedTime);
     };
 
     struct screenHandler {
@@ -84,11 +91,14 @@ public:
 
 private:
     duckHandler m_duckHandler;
+    maxwellHandler m_maxwellHandler;
     screenHandler m_screenHandler;
     keyBoardHandler m_keyBoardHandler;
     static cameraHandler camHandler;
     static renderObjects renderHandler;
     static splineHandler splineFucHandler;
+
+    int controlMenu;
 };
 
 #endif 

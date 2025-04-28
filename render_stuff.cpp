@@ -963,6 +963,22 @@ void renderObjects::drawHandler::drawDuck(const glm::mat4& viewMatrix, const glm
 	glUseProgram(0);
 }
 
+void renderObjects::drawHandler::drawMaxwell(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir) {
+	glUseProgram(shaderProgram.program);
+
+	glm::mat4 modelMatrix = splineHandler::alignObject(position, dir, glm::vec3(0.0f, 0.0f, 1.0f));
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * param.size);
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+	for (int i = 0; i < maxwellGeometry.size(); i++) {
+
+		uniSetter.setMaterialUniforms(maxwellGeometry[i], shaderProgram, gameUni);
+		glBindVertexArray(maxwellGeometry[i]->vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, maxwellGeometry[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+	glUseProgram(0);
+}
+
 // draw explosion method for animation
 void renderObjects::drawHandler::drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry) {
 	glEnable(GL_BLEND);
@@ -1012,8 +1028,11 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cubePosition, 8.0f);
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube2Position, 3.0f);
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube3Position, 11.0f);
-	drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell"]);
-	//drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck"]);
+	//glStencilFunc(GL_ALWAYS, 3, -1);
+	//drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell"]);
+	//glDisable(GL_STENCIL_TEST);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck2"]);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck3"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &balloonGeometry, gameUniVars, loadProps["balloon"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &boatGeometry, gameUniVars, loadProps["boat"]);
 	drawHouse(viewMatrix, projectionMatrix, shaderProgram, &houseGeometry, gameUniVars, housePosition);
