@@ -98,9 +98,9 @@ const glm::vec3 curveData[] = {
 
 };
 // amount of vertices for banner
-const int bannerNumQuadVertices = 4;
+const int barNumQuadVertices = 4;
 // vertices
-const float bannerVertexData[bannerNumQuadVertices * 5] = {
+const float barVertexData[barNumQuadVertices * 5] = {
 	// x      y      z     u     v
 	-1.0f,  0.15f, 0.0f, 0.0f, 1.0f, // levý horní roh
 	-1.0f, -0.15f, 0.0f, 0.0f, 0.0f, // levý dolní roh

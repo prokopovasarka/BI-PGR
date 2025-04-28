@@ -30,21 +30,6 @@ float loadingBarWidth = 0.0f;
 
 bool duckAnimation; //if animation is on or off
 
-//-----------------------------------------------------------CREATING BANNER-------------------------------------------------------------
-Object* gameEngine::createBanner() {
-	Object* newBanner = new Object;
-
-	newBanner->position = glm::vec3(1.4f, 1.0f, 1.15f);
-	newBanner->direction = glm::vec3(1.0f, 0.0f, 0.0f);
-	newBanner->size = 3.0f;
-
-	newBanner->destroyed = false;
-	newBanner->startTime = gameState.elapsedTime;
-	newBanner->currentTime = newBanner->startTime;
-
-	return newBanner;
-}
-
 //---------------------------------------------------------CREATE DUCK--------------------------------------------------------------------
 void gameEngine::duckHandler::createDuck() {
 	Object* newDuck = new Object;
@@ -103,7 +88,7 @@ void gameEngine::duckHandler::updateDuck(float elapsedTime) {
 
 // changing light 
 void gameEngine::evalLightIntensity() {
-	const float cycleDuration = 120.0f; // 120 second loop
+	const float cycleDuration = 60.0f; // 120 second loop
 
 	float timeInCycle = fmod(gameState.elapsedTime, cycleDuration);
 
@@ -114,9 +99,9 @@ void gameEngine::evalLightIntensity() {
 	else {
 		phase = (cycleDuration - timeInCycle) / (cycleDuration / 2.0f); // 1 -> 0
 	}
-
+	phase = pow(phase, 2.0f);
 	// change light
-	gameUniVars.lightIntensity = glm::mix(-1.20f, 0.9f, phase);
+	gameUniVars.lightIntensity = glm::mix(1.0f, -1.2f, phase);
 
 }
 
@@ -235,7 +220,7 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps); // draw almost all meshes
 
 	//update loading bar
-	renderHandler.getDrawHandler().drawBanner(viewMatrix, projectionMatrix, loadingBarWidth);
+	renderHandler.getDrawHandler().drawBar(viewMatrix, projectionMatrix, loadingBarWidth);
 
 
 	glDisable(GL_STENCIL_TEST);
@@ -299,7 +284,10 @@ void gameEngine::updateObjects(float elapsedTime) {
 	gameObjects.camera->currentTime = elapsedTime;
 
 	m_duckHandler.updateDuck(timeDelta); // new position for duck
-	gameHandler->evalLightIntensity(); // change light intensity with according to game time
+	if (gameState.isCloudy)
+		gameHandler->evalLightIntensity(); // change light intensity with according to game time
+	else 
+		gameUniVars.lightIntensity = 0.9f; //else eval intensity back to normal
 
 	loadingBarWidth = glm::clamp(gameObjects.camera->speed / 10.0f, 0.0f, 1.0f); //clam curr speed
 
@@ -369,14 +357,6 @@ void gameEngine::screenHandler::timerCallback(int) {
 	if (gameState.keyMap[KEY_DOWN_ARROW] == true && gameState.freeCameraMode ) {
 		camHandler.decreaseCameraSpeed(gameObjects.camera, CAMERA_SPEED_INCREMENT);
 
-	}
-	if (gameState.drawBanner == true ) {
-		if (gameObjects.banner == NULL) {
-			//gameObjects.banner = gameHandler->createBanner();
-		}
-		else {
-			//gameObjects.banner->currentTime = gameState.elapsedTime;
-		}
 	}
 	// update objects in the scene
 	gameHandler->updateObjects(gameState.elapsedTime);
@@ -493,13 +473,8 @@ void gameEngine::keyBoardHandler::keyboardCallback(unsigned char keyPressed, int
 	case 'f': // turn on fog
 		gameUniVars.isFog = !gameUniVars.isFog;
 		break;
-	case 'b': //shows banner if camera is static
-		/*if (gameObjects.banner == NULL) {
-			gameObjects.banner = gameHandler->createBanner();
-		}
-		if (!gameState.freeCameraMode) {
-			gameState.drawBanner = true;
-		}*/
+	case 'd':
+		gameState.isCloudy = !gameState.isCloudy;
 		break;
 	case 'w':
 		camHandler.moveCamUp(gameObjects.camera, 0.3f);
@@ -655,6 +630,8 @@ void gameEngine::initializeApplication() {
 	gameUniVars.useLighting = true;
 	gameUniVars.isFog = false;
 	gameState.curveMotion = false;
+	gameState.isCloudy = false;
+	gameUniVars.lightIntensity = 0.9f;
 
 	waterFBOHandler= new waterBufferMaker();
 	// initialize shaders
@@ -663,7 +640,6 @@ void gameEngine::initializeApplication() {
 	renderHandler.getInitHandler().initializeModels(waterFBOHandler);
 	glutMouseFunc(m_screenHandler.mouseCallback);
 	gameObjects.camera = NULL;
-	gameObjects.banner = NULL;
 
 	createMenu();
 
@@ -676,10 +652,6 @@ void gameEngine::finalizeApplication() {
 
 	delete gameObjects.camera;
 	gameObjects.camera = NULL;
-	if (gameObjects.banner != NULL) {
-		delete gameObjects.banner;
-		gameObjects.banner = NULL;
-	}
 	delete duck;
 	delete gameHandler;
 	delete waterFBOHandler;

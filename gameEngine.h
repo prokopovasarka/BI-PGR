@@ -35,7 +35,6 @@ Object* duck; //duck object
 struct GameObjects {
 
     Camera* camera; //camera object
-    Object* banner; //banner object
 
 } gameObjects;
 
@@ -47,7 +46,6 @@ public:
         m_keyBoardHandler = keyBoardHandler();
     }
 
-    Object* createBanner();
     void evalLightIntensity();
     void changePointLight();
     void updateObjects(float elapsedTime);

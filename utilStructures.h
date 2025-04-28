@@ -133,10 +133,10 @@ typedef struct _gameState {
 	bool freeCameraMode = false;        // false;
 	bool gameOver;              // false;
 	bool keyMap[KEYS_COUNT];
-	bool drawBanner = false;    // false
 
 	float elapsedTime;          // game time
 	bool curveMotion;           // switch to spline motion
+	bool isCloudy;
 
 } GameState;
 

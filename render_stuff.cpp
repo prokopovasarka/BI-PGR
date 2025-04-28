@@ -18,7 +18,7 @@ MeshGeometry* towerGeometry = NULL;
 MeshGeometry* skyboxGeometry = NULL;
 MeshGeometry* waterGeometry = NULL;
 MeshGeometry* explosionGeometry = NULL;
-MeshGeometry* bannerGeometry = NULL;
+MeshGeometry* barGeometry = NULL;
 MeshGeometry* houseGeometry = NULL;
 MeshGeometry* cubeGeometry = NULL;
 MeshGeometry* sphereGeometry = NULL;
@@ -32,7 +32,6 @@ std::vector<MeshGeometry*> boatGeometry;
 // paths to textures
 const char* SKYBOX_CUBE_TEXTURE_FILE_PREFIX = "data/skybox/skybox";
 const char* EXPLOSION_TEXTURE_PATH = "data/textures/explosion/explosion.png";
-const char* BANNER_TEXTURE_PATH = "data/textures/banner2.png";
 const char* DUDV_MAP = "data/textures/dudv.jpg";
 const char* GRASS_TEXTURE_PATH = "data/textures/plant.png";
 const char* LOADING_BAR_PATH = "data/textures/loadingBar.jpg";
@@ -710,7 +709,7 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	std::cout << "Loading texture file: " << "dudv" << std::endl;
 	waterFBOHandler->setDudvMapTex(pgr::createTexture(DUDV_MAP));
 	initWater(waterShader, &waterGeometry, waterFBOHandler);
-	initBannerGeometry(barShaderProgram.program, &bannerGeometry);
+	initBarGeometry(barShaderProgram.program, &barGeometry);
 	initExplosion(explosionShader, &explosionGeometry);
 	if (loadSingleMesh(TOWER_MODEL_PATH, shaderProgram, &towerGeometry) != true) {
 		std::cerr << "initializeModels(): tower model loading failed." << std::endl;
@@ -743,7 +742,7 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 }
 
 // initialize banner geometry
-void renderObjects::initHandler::initBannerGeometry(GLuint shader, MeshGeometry** geometry) {
+void renderObjects::initHandler::initBarGeometry(GLuint shader, MeshGeometry** geometry) {
 	*geometry = new MeshGeometry;
 
 	(*geometry)->texture = pgr::createTexture(LOADING_BAR_PATH);
@@ -757,7 +756,7 @@ void renderObjects::initHandler::initBannerGeometry(GLuint shader, MeshGeometry*
 
 	glGenBuffers(1, &((*geometry)->vertexBufferObject));
 	glBindBuffer(GL_ARRAY_BUFFER, (*geometry)->vertexBufferObject);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(bannerVertexData), bannerVertexData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(barVertexData), barVertexData, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(barShaderProgram.posLocation);
 	glEnableVertexAttribArray(barShaderProgram.texCoordLocation);
@@ -768,7 +767,7 @@ void renderObjects::initHandler::initBannerGeometry(GLuint shader, MeshGeometry*
 
 	glBindVertexArray(0);
 
-	(*geometry)->numTriangles = bannerNumQuadVertices;
+	(*geometry)->numTriangles = barNumQuadVertices;
 }
 
 //--------------------------------------------------------------------------------TEXTURES--------------------------------------------------------
@@ -794,7 +793,7 @@ void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const gl
 }
 
 // draws banner with credits
-void renderObjects::drawHandler::drawBanner(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth) {
+void renderObjects::drawHandler::drawBar(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth) {
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);                     // alpha 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -817,8 +816,8 @@ void renderObjects::drawHandler::drawBanner(const glm::mat4& viewMatrix, const g
 	glUniform1i(barShaderProgram.texSamplerLocation, 0); // Assuming texture unit 0 is used
 
 	// Bind the vertex array object and draw the geometry
-	glBindVertexArray(bannerGeometry->vertexArrayObject);
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, bannerGeometry->numTriangles);
+	glBindVertexArray(barGeometry->vertexArrayObject);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, barGeometry->numTriangles);
 
 	glBindVertexArray(0);
 
@@ -1020,6 +1019,7 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	drawHouse(viewMatrix, projectionMatrix, shaderProgram, &houseGeometry, gameUniVars, housePosition);
 	glStencilFunc(GL_ALWAYS, 1, -1);
 	drawSphere(viewMatrix, projectionMatrix, shaderProgram, &sphereGeometry, gameUniVars, spherePosition);
+	glDisable(GL_STENCIL_TEST);
 
 	if (drawWaterBool) {
 		drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars);
@@ -1061,6 +1061,7 @@ void renderObjects::cleanupModels() {
 	cleanupGeometry(houseGeometry);
 	cleanupGeometry(cubeGeometry);
 	cleanupGeometry(sphereGeometry);
+	cleanupGeometry(barGeometry);
 	std::vector<MeshGeometry*> v = maxwellGeometry;
 	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
 		cleanupGeometry(*it);

@@ -37,7 +37,7 @@ public:
 		bool loadSingleMesh(const std::string& fileName, SCommonShaderProgram& shader, MeshGeometry** geometry);
 		bool loadMesh(const std::string& fileName, SCommonShaderProgram& shader, std::vector<MeshGeometry*>* geometryFull);
 		void initMaterial(MeshGeometry** geometry, Material material);
-		void initBannerGeometry(GLuint shader, MeshGeometry** geometry);
+		void initBarGeometry(GLuint shader, MeshGeometry** geometry);
 		void initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry** geometry);
 		void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry, waterBufferMaker* waterFBOHandler);
 		void initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geometry);
@@ -71,7 +71,7 @@ public:
 		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps);
 		void drawDuck(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir);
 		void drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion);
-		void drawBanner(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth);
+		void drawBar(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth);
 		void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
 			MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition);
 		void drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry);
