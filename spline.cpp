@@ -2,8 +2,8 @@
 /**
  * \file       spline.cpp
  * \author     Šárka Prokopová
- * \date       2022/4/28
- * \brief      Everything for computing spline
+ * \date       2025/4/28
+ * \brief      Everything for computing spline - Catmull-Rom and Hermite
  *
 */
 //-----------------------------------------------------------------------------------------

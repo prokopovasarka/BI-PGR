@@ -2,7 +2,7 @@
 /**
  * \file       setUni.h
  * \author     Šárka Prokopová
- * \date       2022/4/28
+ * \date       2025/4/28
  * \brief      File made to set all uniforms
  *
 */

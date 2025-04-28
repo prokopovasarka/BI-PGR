@@ -19,5 +19,10 @@
 #include <glm/glm.hpp>
 #include "data.h"
 
+/// <summary>
+/// loading file with props and parsing them into structure
+/// </summary>
+/// <param name="filename"></param>
+/// <returns></returns>
 std::map<std::string, ObjectProp> loadConfig(const std::string& filename);
 #endif

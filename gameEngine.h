@@ -1,3 +1,12 @@
+//-----------------------------------------------------------------------------------------
+/**
+ * \file       gameEngine.h
+ * \author     Šárka Prokopová
+ * \date       2025/4/28
+ * \brief      The whole game logic - structures for handling screen, keyboard, etc.
+ *
+*/
+//-----------------------------------------------------------------------------------------
 #ifndef __GAME_ENGINE_H
 #define __GAME_ENGINE_H
 #include "pgr.h"
@@ -55,18 +64,27 @@ public:
     void createMenu(void);
     static void finalizeApplication();
 
+    /// <summary>
+    /// little struct for duck animation
+    /// </summary>
     struct duckHandler {
     public:
         void createDuck();
         void updateDuck(float elapsedTime);
     };
 
+    /// <summary>
+    /// struct for maxwell cat animation
+    /// </summary>
     struct maxwellHandler {
     public:
         void createMaxwell();
         void updateMaxwell(float elapsedTime);
     };
 
+    /// <summary>
+    /// handling proccesses in screen and callbacks
+    /// </summary>
     struct screenHandler {
     public:
         static void timerCallback(int);
@@ -78,6 +96,9 @@ public:
 
     };
 
+    /// <summary>
+    /// keyboard callbacks handlerer
+    /// </summary>
     struct keyBoardHandler {
     public:
         static void keyboardCallback(unsigned char keyPressed, int mouseX, int mouseY);

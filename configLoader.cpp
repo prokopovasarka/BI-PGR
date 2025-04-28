@@ -3,7 +3,8 @@
  * \file       confidLoader.cpp
  * \author     Šárka Prokopová
  * \date       2025/4/27
- * \brief      Implemented loading file and parsing props, handling errors
+ * \brief      Implemented loading file and parsing props, handling errors when
+ *              file unreadable or something occurs. Done for specific format
  *
 */
 //-----------------------------------------------------------------------------------------

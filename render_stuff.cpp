@@ -2,8 +2,8 @@
 /**
  * \file       render_stuff.cpp
  * \author     Šárka Prokopová
- * \date       2022/4/28
- * \brief      Functions for rendering, initialization and drawing
+ * \date       2025/4/28
+ * \brief      Functions for rendering, initialization and drawing all objects
  *
 */
 //-----------------------------------------------------------------------------------------
@@ -18,6 +18,7 @@ MeshGeometry* towerGeometry = NULL;
 MeshGeometry* skyboxGeometry = NULL;
 MeshGeometry* waterGeometry = NULL;
 MeshGeometry* explosionGeometry = NULL;
+MeshGeometry* platformGeometry = NULL;
 MeshGeometry* barGeometry = NULL;
 MeshGeometry* houseGeometry = NULL;
 MeshGeometry* cubeGeometry = NULL;
@@ -35,6 +36,7 @@ const char* EXPLOSION_TEXTURE_PATH = "data/textures/explosion/explosion.png";
 const char* DUDV_MAP = "data/textures/dudv.jpg";
 const char* GRASS_TEXTURE_PATH = "data/textures/plant.png";
 const char* LOADING_BAR_PATH = "data/textures/loadingBar.jpg";
+const char* GOLD_TEXTURE_PATH = "data/textures/gold.jpg";
 // paths to models
 const char* TOWER_MODEL_PATH = "data/models/tower/tower.obj";
 const char* HOUSE_MODEL_PATH = "data/models/house/house.obj";
@@ -48,7 +50,7 @@ const char* BOAT_MODEL_PATH = "data/models/boat/v_boat.obj";
 //textures
 GLuint grassTexture;
 GLuint loadingBarTexture;
-
+GLuint platformTexture;
 
 // positions of models
 glm::vec3 towerPosition = glm::vec3(0.0f, 0.02f, 1.4f);
@@ -632,6 +634,42 @@ void renderObjects::initHandler::initializeShaderPrograms() {
 	barShaderProgram.texSamplerLocation = glGetUniformLocation(barShaderProgram.program, "texSampler");
 }
 
+void renderObjects::initHandler::initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry) {
+
+	*geometry = new MeshGeometry;
+
+	glGenVertexArrays(1, &((*geometry)->vertexArrayObject));
+	glBindVertexArray((*geometry)->vertexArrayObject);
+
+	glGenBuffers(1, &((*geometry)->vertexBufferObject));
+	glBindBuffer(GL_ARRAY_BUFFER, (*geometry)->vertexBufferObject);
+	//size of array of vertices
+	glBufferData(GL_ARRAY_BUFFER, bodyNVertices * 8, bodyVertices, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &((*geometry)->elementBufferObject));
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (*geometry)->elementBufferObject);
+	//size of array of triangles
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * bodyNTriangles, bodyTriangles, GL_STATIC_DRAW);
+
+	//send to shaders
+	glEnableVertexAttribArray(shaderProgram.posLocation);
+	glVertexAttribPointer(shaderProgram.posLocation, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+	glEnableVertexAttribArray(shaderProgram.normalLocation);
+	glVertexAttribPointer(shaderProgram.normalLocation, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(shaderProgram.texCoordLocation);
+	glVertexAttribPointer(shaderProgram.texCoordLocation, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+
+	glBindVertexArray(0);
+
+	//Hardcoded materials assign
+	(*geometry)->ambient = glm::vec3(0.08f);
+	(*geometry)->diffuse = glm::vec3(0.58f);
+	(*geometry)->specular = glm::vec3(0.96f);
+	(*geometry)->shininess = 10.5f;
+	(*geometry)->numTriangles = bodyNTriangles;
+}
+
 // initialize materials
 void renderObjects::initHandler::initMaterial(MeshGeometry** geometry, Material material) {
 	(*geometry)->ambient = material.ambient;
@@ -711,6 +749,8 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	initWater(waterShader, &waterGeometry, waterFBOHandler);
 	initBarGeometry(barShaderProgram.program, &barGeometry);
 	initExplosion(explosionShader, &explosionGeometry);
+	platformTexture = pgr::createTexture(GOLD_TEXTURE_PATH);
+	initplatformGeometry(shaderProgram, &platformGeometry);
 	if (loadSingleMesh(TOWER_MODEL_PATH, shaderProgram, &towerGeometry) != true) {
 		std::cerr << "initializeModels(): tower model loading failed." << std::endl;
 	}
@@ -854,6 +894,39 @@ void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const g
 	}
 	glBindVertexArray(0);
 	glUseProgram(0);
+	return;
+}
+
+// draw platform model
+void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix) {
+	//data texture
+	platformGeometry->texture = platformTexture;
+	glUseProgram(shaderProgram.program);
+	uniSetter.setMaterialUniforms((*geometry), shaderProgram, gameUni);
+
+	glm::mat4 modelMatrix;
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0, 1.0, 1.0) * platformProps.size);
+
+	if (platformProps.align) {
+		modelMatrix = splineHandler::alignObject(platformProps.position, platformProps.front, platformProps.up);
+	}
+	else {
+		modelMatrix = glm::translate(modelMatrix, platformProps.position);
+		modelMatrix = glm::rotate(modelMatrix, platformProps.angle, platformProps.front);
+	}
+
+	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
+
+	glUniform1i(shaderProgram.useTextureLocation, 1);
+	glUniform1i(shaderProgram.texSamplerLocation, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, platformGeometry->texture);
+	glBindVertexArray(platformGeometry->vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, 3 * platformGeometry->numTriangles, GL_UNSIGNED_INT, (void*)0);
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+
 	return;
 }
 
@@ -1020,8 +1093,6 @@ void renderObjects::drawHandler::drawExplosion(const glm::mat4& viewMatrix, cons
 
 // draw all models and animations
 void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps) {
-	glEnable(GL_STENCIL_TEST);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	//glStencilFunc(GL_ALWAYS, 0, -1);
 	drawSkybox(viewMatrix, projectionMatrix, skyboxShader, &skyboxGeometry, gameUniVars);
 	drawTower(viewMatrix, projectionMatrix, shaderProgram, &towerGeometry, gameUniVars, towerPosition);
@@ -1031,11 +1102,14 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	//glStencilFunc(GL_ALWAYS, 3, -1);
 	//drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell"]);
 	//glDisable(GL_STENCIL_TEST);
+	drawPlatform(loadProps["platform"], viewMatrix, shaderProgram, &platformGeometry, gameUniVars, projectionMatrix);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck2"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck3"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &balloonGeometry, gameUniVars, loadProps["balloon"]);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &boatGeometry, gameUniVars, loadProps["boat"]);
 	drawHouse(viewMatrix, projectionMatrix, shaderProgram, &houseGeometry, gameUniVars, housePosition);
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	glStencilFunc(GL_ALWAYS, 1, -1);
 	drawSphere(viewMatrix, projectionMatrix, shaderProgram, &sphereGeometry, gameUniVars, spherePosition);
 	glDisable(GL_STENCIL_TEST);
@@ -1044,7 +1118,6 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 		drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars);
 	}
 
-	glDisable(GL_STENCIL_TEST);
 }
 
 //--------------------------------------------------------------------------------CLEANING--------------------------------------------------------

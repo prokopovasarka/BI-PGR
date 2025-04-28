@@ -6,7 +6,8 @@
  * \brief      house by the lake
  *
  *  Interactive scene where user can move around and click on objects.
- *  Scene has changing daytime, lights, interactive duck animation.
+ *  Scene has changing weather - cloudy weather after allowing, lights, 
+*	interactive duck animation, explosion and Maxwell cat move.
 */
 //-----------------------------------------------------------------------------------------
 
@@ -26,11 +27,12 @@ renderObjects gameEngine::renderHandler;
 cameraHandler gameEngine::camHandler;
 splineHandler gameEngine::splineFucHandler;
 
-float loadingBarWidth = 0.0f;
+float loadingBarWidth = 0.0f; //var for loading bar
 
 bool duckAnimation; //if animation is on or off
 
-//---------------------------------------------------------CREATE DUCK--------------------------------------------------------------------
+//---------------------------------------------------------CREATE OBJECTS--------------------------------------------------------------------
+//create duck
 void gameEngine::duckHandler::createDuck() {
 	Object* newDuck = new Object;
 
@@ -45,6 +47,7 @@ void gameEngine::duckHandler::createDuck() {
 	gameObjects.duck = newDuck;
 }
 
+// create Maxwell object
 void gameEngine::maxwellHandler::createMaxwell() {
 	Object* newMaxwell = new Object;
 
@@ -95,7 +98,7 @@ void gameEngine::duckHandler::updateDuck(float elapsedTime) {
 		gameObjects.duck->startTime += elapsedTime;
 		float a = gameObjects.duck->startTime;
 		a *= 0.6;
-		gameObjects.duck->position = splineFucHandler.evaluateClosedCurve(duckCurvePoints, duckCurvePointsTotal, a);
+		gameObjects.duck->position = splineFucHandler.evaluateClosedCurve(duckCurvePoints, duckCurvePointsTotal, a); //catmull-Rom
 		glm::vec3 newDirection = -glm::normalize(splineFucHandler.evalClosedCurveFirstDev(duckCurvePoints, duckCurvePointsTotal, a));
 
 		gameObjects.duck->direction = mix(gameObjects.duck->direction, newDirection, 0.1f);
@@ -250,7 +253,6 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	glStencilFunc(GL_ALWAYS, 2, -1);
 
 	renderHandler.getDrawHandler().drawDuck(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["duck"], gameObjects.duck->position, gameObjects.duck->direction); // draw duck, v=2
-	glDisable(GL_STENCIL_TEST);
 	glStencilFunc(GL_ALWAYS, 3, -1);
 	renderHandler.getDrawHandler().drawMaxwell(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["maxwell"], gameObjects.maxwellObj->position, gameObjects.maxwellObj->direction); //draw maxwell
 	glDisable(GL_STENCIL_TEST);
@@ -367,7 +369,7 @@ void gameEngine::updateObjects(float elapsedTime) {
 		}
 	}
 
-	//blow him after explosion
+	//blow cat after explosion
 	if (gameState.blowMaxwell) {
 		m_maxwellHandler.updateMaxwell(timeDelta); //new movement for maxwell
 	}

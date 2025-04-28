@@ -2,7 +2,7 @@
 /**
  * \file       render_stuff.h
  * \author     Šárka Prokopová
- * \date       2022/4/28
+ * \date       2025/4/28
  * \brief      Functions for rendering, initialization and drawing
  *
 */
@@ -40,6 +40,7 @@ public:
 		void initBarGeometry(GLuint shader, MeshGeometry** geometry);
 		void initSkyboxGeometry(skyboxFarPlaneShaderProgram  skyboxShader, MeshGeometry** geometry);
 		void initWater(SCommonShaderProgram& shader, MeshGeometry** geometry, waterBufferMaker* waterFBOHandler);
+		void initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry);
 		void initExplosion(ExplosionShaderProgram& explosionShader, MeshGeometry** geometry);
 
 		void initializeShaderPrograms();
@@ -75,6 +76,8 @@ public:
 		void drawBar(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, float loadingBarWidth);
 		void drawHouse(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
 			MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition);
+		void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram,
+			MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix);
 		void drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry);
 	};
 

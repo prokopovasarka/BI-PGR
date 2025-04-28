@@ -45,3 +45,11 @@ position=1.4,1.6,1.15
 size=0.1
 angle=1.5
 align=false
+
+[platform]
+front=0.0,1.0,0.0
+up=0.0,0.0,0.0
+position=-25.4,4.7,10.29
+size=0.1
+angle=1.55
+align=false

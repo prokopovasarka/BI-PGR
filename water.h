@@ -2,8 +2,8 @@
 /**
  * \file       water.h
  * \author     Šárka Prokopová
- * \date       2022/4/28
- * \brief      File for generating water texture
+ * \date       2025/4/28
+ * \brief      File for generating water 
  *
 */
 //-----------------------------------------------------------------------------------------
@@ -30,11 +30,13 @@ static int REFLECTION_HEIGHT = 180;
 static int REFRACTION_WIDTH = 1280;
 static int REFRACTION_HEIGHT = 720;
 
-
 void addVertex(GLfloat* buffer, int& index, float x, float y, float z, float u, float v);
 void generateWater(GLfloat waterVertices[]);
 void createSquare(GLfloat waterVertices[], float x1, float y1, float x2, float y2, int index);
 
+/// <summary>
+/// class for handling with refraction and reflection buffer, set dudv texture and binding
+/// </summary>
 class waterBufferMaker {
 public:
 

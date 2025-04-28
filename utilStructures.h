@@ -2,7 +2,7 @@
 /**
  * \file       utilStructures.h
  * \author     Šárka Prokopová
- * \date       2022/4/28
+ * \date       2025/4/28
  * \brief      Functions for rendering, initialization and drawing
  *
 */
@@ -174,8 +174,10 @@ typedef struct _bannerShaderProgram {
 	GLint texSamplerLocation;
 } BannerShaderProgram;
 
+// structure for loading bar
 typedef struct _barShaderProgram {
-	GLuint program;
+	GLuint program; 
+	//vertex attributes locations
 	GLint posLocation;
 	GLint texCoordLocation;
 	GLint PVMmatrixLocation;

@@ -2,7 +2,7 @@
 /**
  * \file       camera.h
  * \author     Šárka Prokopová
- * \date       2022/4/28
+ * \date       2025/4/28
  * \brief      Evaluating positions for camera and switching between
  *			static views and free mode
  *
@@ -15,10 +15,16 @@
 #include "render_stuff.h"
 
 // booleans
+// teleport speed for cam changes
 extern float teleportSpeed;
+// if it's first time run
 extern bool firstTime;
+// gamestate
 extern GameState gameState;
 
+/// <summary>
+/// Handling camera, position and changes
+/// </summary>
 class cameraHandler {
 public:
 	cameraHandler() = default;

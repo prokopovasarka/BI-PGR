@@ -2,8 +2,9 @@
 /**
  * \file       water.cpp
  * \author     Šárka Prokopová
- * \date       2022/4/28
- * \brief      File for generating water texture
+ * \date       2025/4/28
+ * \brief      File for generating water - using two buffers for reflection and
+ *				refraction, dudv map.
  *
 */
 //-----------------------------------------------------------------------------------------

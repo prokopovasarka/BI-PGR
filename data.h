@@ -2,7 +2,7 @@
 /**
  * \file       data.h
  * \author     Šárka Prokopová
- * \date       2022/4/28
+ * \date       2025/4/28
  * \brief      parameters for props and material
  *
 */
@@ -58,6 +58,7 @@ const Material waterMaterial = {
 		1.0f,                         //shinines					 
 };
 
+//struct for props, they are loaded from config.txt
 typedef struct ObjectProp {
 
 	glm::vec3     front;     // front vector or rotation axis
