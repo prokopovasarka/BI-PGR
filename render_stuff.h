@@ -68,8 +68,8 @@ public:
 		void drawObject(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram,
 			std::vector<MeshGeometry*>* geometry, GameUniformVariables gameUni, ObjectProp param);
 		void drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, 
-			MeshGeometry** geometry, GameUniformVariables gameUni);
-		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps);
+			MeshGeometry** geometry, GameUniformVariables gameUni, waterBufferMaker* waterFBOHandler);
+		void drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps, waterBufferMaker* waterFBOHandler);
 		void drawDuck(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir);
 		void drawMaxwell(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni, ObjectProp param, glm::vec3 position, glm::vec3 dir);
 		void drawExplosion(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, Explosion* explosion);

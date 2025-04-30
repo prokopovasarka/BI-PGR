@@ -6,6 +6,14 @@ size=0.7
 angle=0.0
 align=false
 
+[maxwell2]
+front=1.0,0.3,0.5
+up=0.0,0.0,0.0
+position=-3.6,0.8,1.2
+size=1.0
+angle=1.8
+align=false
+
 [duck]
 front=0.0,1.0,0.0
 up=0.0,0.0,0.0
@@ -49,7 +57,7 @@ align=false
 [platform]
 front=0.0,1.0,0.0
 up=0.0,0.0,0.0
-position=-25.4,4.7,10.29
+position=-25.4,4.7,9.5
 size=0.1
 angle=1.55
 align=false

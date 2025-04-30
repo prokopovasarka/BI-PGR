@@ -256,7 +256,7 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	glStencilFunc(GL_ALWAYS, 3, -1);
 	renderHandler.getDrawHandler().drawMaxwell(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["maxwell"], gameObjects.maxwellObj->position, gameObjects.maxwellObj->direction); //draw maxwell
 	glDisable(GL_STENCIL_TEST);
-	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps); // draw almost all meshes
+	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps, waterFBOHandler); // draw almost all meshes
 
 	//update loading bar
 	renderHandler.getDrawHandler().drawBar(viewMatrix, projectionMatrix, loadingBarWidth);

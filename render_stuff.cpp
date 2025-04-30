@@ -813,11 +813,26 @@ void renderObjects::initHandler::initBarGeometry(GLuint shader, MeshGeometry** g
 //--------------------------------------------------------------------------------TEXTURES--------------------------------------------------------
 
 // draw water
-void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni) {
+void renderObjects::drawHandler::drawWater(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, waterBufferMaker* waterFBOHandler) {
 
 	GLfloat factor = WAVE_SPEED * gameState.elapsedTime;
 	factor = std::fmod(factor, 1.0);
 	glUseProgram(shaderProgram.program);
+
+	// bind correct textures
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, waterFBOHandler->getReflectionTexture());
+	glUniform1i(shaderProgram.reflectionTextureLocation, 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, waterFBOHandler->getRefractionTexture());
+	glUniform1i(shaderProgram.refractionTextureLocation, 1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, waterFBOHandler->getdudvMapTexID());
+	glUniform1i(shaderProgram.dudvMapLocation, 2);
+	glActiveTexture(GL_TEXTURE0);
+
 	uniSetter.setWaterUni(shaderProgram, factor);
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1, 1, 1));
@@ -1092,7 +1107,7 @@ void renderObjects::drawHandler::drawExplosion(const glm::mat4& viewMatrix, cons
 }
 
 // draw all models and animations
-void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps) {
+void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, bool drawWaterBool, std::map<std::string, ObjectProp> loadProps, waterBufferMaker* waterFBOHandler) {
 	//glStencilFunc(GL_ALWAYS, 0, -1);
 	drawSkybox(viewMatrix, projectionMatrix, skyboxShader, &skyboxGeometry, gameUniVars);
 	drawTower(viewMatrix, projectionMatrix, shaderProgram, &towerGeometry, gameUniVars, towerPosition);
@@ -1100,7 +1115,7 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube2Position, 3.0f);
 	drawCube(viewMatrix, projectionMatrix, shaderProgram, &cubeGeometry, gameUniVars, cube3Position, 11.0f);
 	//glStencilFunc(GL_ALWAYS, 3, -1);
-	//drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell"]);
+	drawObject(viewMatrix, projectionMatrix, shaderProgram, &maxwellGeometry, gameUniVars, loadProps["maxwell2"]);
 	//glDisable(GL_STENCIL_TEST);
 	drawPlatform(loadProps["platform"], viewMatrix, shaderProgram, &platformGeometry, gameUniVars, projectionMatrix);
 	drawObject(viewMatrix, projectionMatrix, shaderProgram, &duckGeometry, gameUniVars, loadProps["duck2"]);
@@ -1115,7 +1130,7 @@ void renderObjects::drawHandler::drawEverything(const glm::mat4& viewMatrix, con
 	glDisable(GL_STENCIL_TEST);
 
 	if (drawWaterBool) {
-		drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars);
+		drawWater(viewMatrix, projectionMatrix, waterShader, &waterGeometry, gameUniVars, waterFBOHandler);
 	}
 
 }
