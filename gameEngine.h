@@ -40,13 +40,19 @@ std::list<Explosion*> explosions; //list of explosions
 
 std::map<std::string, ObjectProp> m_loadProps;
 
-struct GameObjects {
+struct 
+{
 
     Camera* camera; //camera object
     Object* duck; //duck object
     Object* maxwellObj; //maxwell object
 
 } gameObjects;
+
+Light sun;
+Light cameraReflector;
+Light sphereLight;
+
 
 class gameEngine {
 public:
@@ -56,6 +62,7 @@ public:
         m_keyBoardHandler = keyBoardHandler();
     }
 
+    void setupLights();
     void evalLightIntensity();
     void changePointLight();
     void updateObjects(float elapsedTime);

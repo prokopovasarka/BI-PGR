@@ -10,6 +10,16 @@
 #include "pgr.h"
 #include "setUni.h"
 
+void setUniforms::setLightUniforms(  Light & light, LightLocation & location ) {
+	glUniform3fv(location.ambient, 1, glm::value_ptr(light.ambient));
+	glUniform3fv(location.diffuse, 1, glm::value_ptr(light.diffuse));
+	glUniform3fv(location.specular, 1, glm::value_ptr(light.specular));
+	if (light.spotCosCutOff) {
+		glUniform1f(location.spotCosCutOff, light.spotCosCutOff);
+		glUniform1f(location.spotExponent, light.spotExponent);
+	}
+}
+
 // function to set material uniforms
 void setUniforms::setMaterialUniforms( MeshGeometry* geometry, SCommonShaderProgram& shaderProgram, GameUniformVariables gameUni) {
 

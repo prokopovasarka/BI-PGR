@@ -14,6 +14,8 @@
 #define WINDOW_HEIGHT  800
 #define WINDOW_TITLE   "PGR semestral"
 
+#include "pgr.h"
+
 // keys used in the key map
 enum { KEY_LEFT_ARROW, KEY_RIGHT_ARROW, KEY_UP_ARROW, KEY_DOWN_ARROW, KEY_SPACE, KEYS_COUNT };
 
@@ -50,6 +52,25 @@ typedef struct Material {
 	std::string   texture;
 
 } Material;
+
+//struct for light
+typedef struct Light {
+
+	glm::vec3  ambient;       // intensity & color of the ambient component
+	glm::vec3  diffuse;       // intensity & color of the diffuse component
+	glm::vec3  specular;      // intensity & color of the specular component
+	float spotCosCutOff = 0.0f; // cosine of the spotlight's half angle
+	float spotExponent = 0.0f;  // distribution of the light energy within the reflector's cone (center->cone's edge)
+
+} Light;
+
+typedef struct LightLocations {
+	GLuint  ambient;
+	GLuint  diffuse;
+	GLuint  specular;
+	GLuint  spotCosCutOff;
+	GLuint  spotExponent;
+} LightLocation;
 
 const Material waterMaterial = {
 		glm::vec3(0.5f, 0.5f, 0.5f),  //ambient

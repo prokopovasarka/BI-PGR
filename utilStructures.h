@@ -108,7 +108,9 @@ typedef struct _commonShaderProgram {
 	GLint pointLightIntensityLocation;
 	GLint lightIntensityLocation;
 
-
+	LightLocation sunLocation;
+	LightLocation reflLocation;
+	LightLocation sphereLocation;
 } SCommonShaderProgram;
 
 // shader for skybox

@@ -514,7 +514,23 @@ void renderObjects::initHandler::initializeShaderPrograms() {
 	shaderProgram.reflectorDirectionLocation = glGetUniformLocation(shaderProgram.program, "reflectorDirection");
 	// fog switch
 	shaderProgram.isFogLocation = glGetUniformLocation(shaderProgram.program, "fog");
-	// lights
+	// LIGHTS: sun
+	shaderProgram.sunLocation.ambient = glGetUniformLocation(shaderProgram.program, "sunUni.ambient");
+	shaderProgram.sunLocation.diffuse = glGetUniformLocation(shaderProgram.program, "sunUni.diffuse");
+	shaderProgram.sunLocation.specular = glGetUniformLocation(shaderProgram.program, "sunUni.specular");
+
+	// LIGHTS: reflLocation
+	shaderProgram.reflLocation.ambient = glGetUniformLocation(shaderProgram.program, "cameraReflectorUni.ambient");
+	shaderProgram.reflLocation.diffuse = glGetUniformLocation(shaderProgram.program, "cameraReflectorUni.diffuse");
+	shaderProgram.reflLocation.specular = glGetUniformLocation(shaderProgram.program, "cameraReflectorUni.specular");
+	shaderProgram.reflLocation.spotCosCutOff = glGetUniformLocation(shaderProgram.program, "cameraReflectorUni.spotCosCutOff");
+	shaderProgram.reflLocation.spotExponent = glGetUniformLocation(shaderProgram.program, "cameraReflectorUni.spotExponent");
+
+	// LIGHTS: sphereLocation
+	shaderProgram.sphereLocation.ambient = glGetUniformLocation(shaderProgram.program, "sphereLightUni.ambient");
+	shaderProgram.sphereLocation.diffuse = glGetUniformLocation(shaderProgram.program, "sphereLightUni.diffuse");
+	shaderProgram.sphereLocation.specular = glGetUniformLocation(shaderProgram.program, "sphereLightUni.specular");
+
 	shaderProgram.spotLightLocation = glGetUniformLocation(shaderProgram.program, "spotLight");
 	shaderProgram.pointLightIntensityLocation = glGetUniformLocation(shaderProgram.program, "pointLightIntensity");
 	shaderProgram.lightIntensityLocation = glGetUniformLocation(shaderProgram.program, "lightIntensity");
@@ -632,6 +648,15 @@ void renderObjects::initHandler::initializeShaderPrograms() {
 	barShaderProgram.PVMmatrixLocation = glGetUniformLocation(barShaderProgram.program, "PVMmatrix");
 	barShaderProgram.timeLocation = glGetUniformLocation(barShaderProgram.program, "time");
 	barShaderProgram.texSamplerLocation = glGetUniformLocation(barShaderProgram.program, "texSampler");
+}
+
+
+void renderObjects::initHandler::setLight(Light& sun, Light& camR, Light& sphere) {
+	glUseProgram(shaderProgram.program);
+	uniSetter.setLightUniforms(sun, shaderProgram.sunLocation);
+	uniSetter.setLightUniforms(camR, shaderProgram.reflLocation);
+	uniSetter.setLightUniforms(sphere, shaderProgram.sphereLocation);
+	glUseProgram(0);
 }
 
 void renderObjects::initHandler::initplatformGeometry(SCommonShaderProgram& shader, MeshGeometry** geometry) {

@@ -45,6 +45,8 @@ public:
 
 		void initializeShaderPrograms();
 
+		void setLight(Light& sun, Light& camR, Light& sphere);
+
 		void initializeModels(waterBufferMaker* waterFBOHandler);
 
 		GLuint platformTexture;
@@ -86,6 +88,7 @@ public:
 
 	initHandler& getInitHandler() { return m_initHandler; }
 	drawHandler& getDrawHandler() { return m_drawHandler; }
+	setUniforms& getUniSetter() { return uniSetter; }
 
 private:
 	initHandler m_initHandler;

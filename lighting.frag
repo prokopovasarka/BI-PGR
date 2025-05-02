@@ -40,6 +40,15 @@ uniform bool spotLight;            // to turn on spot light on camera
 uniform float lightIntensity;      // intensity of the directional and gloabl light, to set daytime
 uniform float pointLightIntensity; // intensity of the lamp
 
+// diffrent types of lights
+uniform Light sunUni;
+uniform Light cameraReflectorUni;
+uniform Light sphereLightUni;
+
+Light sun;
+Light cameraReflector;
+Light sphereLight;
+
 smooth in vec2 texCoord_v;             // fragment texture coordinates
 smooth in vec3 vertexPosition;         // vertex position in world space
 smooth in vec3 vertexNormal;           // vertex normal
@@ -114,30 +123,22 @@ vec4 pointLight(Light light, Material material, vec3 position, vec3 normal) {
 		return vec4(ret, 1.0);
 }
 
-// diffrent types of lights
-Light sun;
-Light cameraReflector;
-Light sphereLight;
-
 
 void setupLights() {
 	// sphere - point light
-		sphereLight.ambient = vec3(1.0) * pointLightIntensity;
-		sphereLight.diffuse = vec3(1.0, 1.0, 0.5f) * pointLightIntensity;
-		sphereLight.specular = vec3(1.0)* pointLightIntensity;
+		sphereLight.ambient = sphereLightUni.ambient * pointLightIntensity;
+		sphereLight.diffuse = sphereLightUni.diffuse * pointLightIntensity;
+		sphereLight.specular = sphereLightUni.specular * pointLightIntensity;
 		sphereLight.position = (Vmatrix * vec4(-0.3, 1.4, 0.2, 1.0)).xyz;
 	// sun - directional light
-		sun.ambient = vec3(0.2f);
-		sun.diffuse = vec3(1.0, 1.0, 1.0f);
-		sun.specular = vec3(1.0);
+		sun.ambient = sunUni.ambient;
+		sun.diffuse = sunUni.diffuse;
+		sun.specular = sunUni.specular;
 		sun.position = (Vmatrix * vec4(-1.78, 6.83, 8.0, 1.0)).xyz;
 	// camera reflector - spot light
-		cameraReflector.ambient       = vec3(0.2f);
-		cameraReflector.diffuse       = vec3(1.0);
-		cameraReflector.specular      = vec3(1.0);
-		cameraReflector.spotCosCutOff = 0.95f;
-		cameraReflector.spotExponent  = 0.0;
-		
+		cameraReflector.ambient = cameraReflectorUni.ambient;
+		cameraReflector.diffuse = cameraReflectorUni.diffuse;
+		cameraReflector.specular = cameraReflectorUni.specular;
 		cameraReflector.position = (Vmatrix * vec4(reflectorPosition, 1.0)).xyz;
 		cameraReflector.spotDirection = normalize((Vmatrix * vec4(reflectorDirection, 0.0)).xyz);
 

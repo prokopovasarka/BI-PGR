@@ -121,6 +121,25 @@ void gameEngine::maxwellHandler::updateMaxwell(float deltaTime) {
 	gameObjects.maxwellObj->currentTime += deltaTime;
 }
 
+// setup lightning structures to pass them by uniform
+void gameEngine::setupLights() {
+	// sphere - point light
+	sphereLight.ambient = glm::vec3(1.0);
+	sphereLight.diffuse = glm::vec3(1.0, 1.0, 0.5f);
+	sphereLight.specular = glm::vec3(1.0);
+	// sun - directional light
+	sun.ambient = glm::vec3(0.2f);
+	sun.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	sun.specular = glm::vec3(1.0);
+	// camera reflector - spot light
+	cameraReflector.ambient = glm::vec3(0.2f);
+	cameraReflector.diffuse = glm::vec3(1.0);
+	cameraReflector.specular = glm::vec3(1.0);
+	cameraReflector.spotCosCutOff = 0.95f;
+	cameraReflector.spotExponent = 0.0;
+
+}
+
 // changing light 
 void gameEngine::evalLightIntensity() {
 	const float cycleDuration = 60.0f; // 120 second loop
@@ -190,7 +209,6 @@ void gameEngine::restartGame() {
 	gameUniVars.pointLightIntensity = 0.0f;
 	gameUniVars.useLighting = true;
 	gameUniVars.spotLight = false;
-
 }
 
 
@@ -715,6 +733,8 @@ void gameEngine::initializeApplication() {
 	waterFBOHandler= new waterBufferMaker();
 	// initialize shaders
 	renderHandler.getInitHandler().initializeShaderPrograms();
+	setupLights();
+	renderHandler.getInitHandler().setLight( sun, cameraReflector, sphereLight );
 	// create geometry for all models used
 	renderHandler.getInitHandler().initializeModels(waterFBOHandler);
 	glutMouseFunc(m_screenHandler.mouseCallback);
