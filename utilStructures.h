@@ -25,6 +25,7 @@ typedef struct MeshGeometry {
 	glm::vec3     specular;
 	float         shininess;
 	GLuint        texture;
+	GLuint		  secTex;
 
 } MeshGeometry;
 

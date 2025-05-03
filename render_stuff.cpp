@@ -48,9 +48,9 @@ const char* BALLOON_MODEL_PATH = "data/models/balloons/balloon.obj";
 const char* BOAT_MODEL_PATH = "data/models/boat/v_boat.obj";
 
 //textures
-GLuint grassTexture;
 GLuint loadingBarTexture;
 GLuint platformTexture;
+GLuint grassTexture;
 
 // positions of models
 glm::vec3 towerPosition = glm::vec3(0.0f, 0.02f, 1.4f);
@@ -692,6 +692,7 @@ void renderObjects::initHandler::initplatformGeometry(SCommonShaderProgram& shad
 	(*geometry)->diffuse = glm::vec3(0.58f);
 	(*geometry)->specular = glm::vec3(0.96f);
 	(*geometry)->shininess = 10.5f;
+	(*geometry)->texture = platformTexture;
 	(*geometry)->numTriangles = bodyNTriangles;
 }
 
@@ -783,6 +784,7 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 		std::cerr << "initializeModels(): Cube model loading failed." << std::endl;
 	}
 	grassTexture = pgr::createTexture(GRASS_TEXTURE_PATH);
+	cubeGeometry->secTex = grassTexture;
 	if(!grassTexture) {
 		std::cerr << "loading failed." << std::endl;
 	};
@@ -940,7 +942,6 @@ void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const g
 // draw platform model
 void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix) {
 	//data texture
-	platformGeometry->texture = platformTexture;
 	glUseProgram(shaderProgram.program);
 	uniSetter.setMaterialUniforms((*geometry), shaderProgram, gameUni);
 
@@ -957,12 +958,10 @@ void renderObjects::drawHandler::drawPlatform(ObjectProp platformProps, const gl
 
 	uniSetter.setTransformUniforms(modelMatrix, viewMatrix, projectionMatrix, shaderProgram);
 
-	glUniform1i(shaderProgram.useTextureLocation, 1);
-	glUniform1i(shaderProgram.texSamplerLocation, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, platformGeometry->texture);
-	glBindVertexArray(platformGeometry->vertexArrayObject);
-	glDrawElements(GL_TRIANGLES, 3 * platformGeometry->numTriangles, GL_UNSIGNED_INT, (void*)0);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, (*geometry)->texture);
+	glBindVertexArray((*geometry)->vertexArrayObject);
+	glDrawElements(GL_TRIANGLES, 3 * (*geometry)->numTriangles, GL_UNSIGNED_INT, (void*)0);
 
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -986,16 +985,19 @@ void renderObjects::drawHandler::drawCube(const glm::mat4& viewMatrix, const glm
 	glUniform3fv(shaderProgram.specularLocation, 1, glm::value_ptr(cubeGeometry->specular));
 	glUniform1f(shaderProgram.shininessLocation, cubeGeometry->shininess);
 
+
 	glUniform1i(shaderProgram.useTextureLocation, 1);
 	glUniform1i(shaderProgram.texSamplerLocation, 0);
 
-	//glUniform1i(shaderProgram.secTextureLocation, 1);
-	glUniform1i(shaderProgram.texSampler2Location, 4);
+	if (cubeGeometry->secTex) {
+		glUniform1i(shaderProgram.secTextureLocation, 1);
+		glUniform1i(shaderProgram.texSampler2Location, 1);
+	}
 
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, cubeGeometry->texture);
-	glActiveTexture(GL_TEXTURE0 + 4);
-	glBindTexture(GL_TEXTURE_2D, grassTexture);
+	glActiveTexture(GL_TEXTURE0 + 1);
+	glBindTexture(GL_TEXTURE_2D, cubeGeometry->secTex);
 
 	glBindVertexArray(cubeGeometry->vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, cubeGeometry->numTriangles * 3, GL_UNSIGNED_INT, 0);

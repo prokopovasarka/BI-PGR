@@ -168,6 +168,10 @@ void main() {
 
 		color_f.w = 1.0;
 
+		// using only one texture
+		if (material.useTexture)
+			color_f = color_f * texture(texSampler, texCoord_v);
+
 		//using two textures
 		if (material.useTexture && secTexture){
 			vec4 tex0, tex1, res;
@@ -176,9 +180,6 @@ void main() {
 			res = mix(tex0, tex1, tex1.a);
 			color_f = vec4(color_f.rgb * res.rgb, res.a);
 		} 
-		// using only one texture
-		if (material.useTexture)
-			color_f = color_f * texture(texSampler, texCoord_v);
 
 
 		if(fog) {
