@@ -31,7 +31,7 @@ std::vector<MeshGeometry*> balloonGeometry;
 std::vector<MeshGeometry*> boatGeometry;
 std::vector<MeshGeometry*> poolGeometry;
 std::vector<MeshGeometry*> ballGeometry;
-std::vector<MeshGeometry*> secBallGeometry;
+std::vector<MeshGeometry*> hatGeometry;
 
 
 
@@ -53,6 +53,7 @@ const char* BALLOON_MODEL_PATH = "data/models/balloons/balloon.obj";
 const char* BOAT_MODEL_PATH = "data/models/boat/v_boat.obj";
 const char* POOL_MODEL_PATH = "data/models/pool/InflatablePool.obj";
 const char* BALL_MODEL_PATH = "data/models/ball/untitled.obj";
+const char* FLAMINGO_MODEL_PATH = "data/models/hat/AcademicHat.obj";
 
 
 //textures
@@ -820,8 +821,8 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 	if (loadMesh(BALL_MODEL_PATH, shaderProgram, &ballGeometry) != true) {
 		std::cerr << "initializeModels(): ball model loading failed." << std::endl;
 	}
-	if (loadMesh(BALL_MODEL_PATH, shaderProgram, &secBallGeometry) != true) {
-		std::cerr << "initializeModels(): ball model loading failed." << std::endl;
+	if (loadMesh(FLAMINGO_MODEL_PATH, shaderProgram, &hatGeometry) != true) {
+		std::cerr << "initializeModels(): hat model loading failed." << std::endl;
 	}
 }
 
@@ -966,7 +967,7 @@ void renderObjects::drawHandler::drawPoolMethod( float time, const glm::mat4& vi
 
 	glm::mat4 alignMatrix = splineHandler::alignObject(poolObj->position, props["pool"].front, props["pool"].up);
 
-// 2. pool transformation
+	// first - parent, pool realistic transformation (depends on elapsedTime)
 	glm::mat4 poolTransform = alignMatrix * waveMatrix;
 
 	// draw Pool
@@ -985,7 +986,7 @@ void renderObjects::drawHandler::drawPoolMethod( float time, const glm::mat4& vi
 	glBindVertexArray(0);
 	glUseProgram(0);
 
-	// 3. ball - inherit from pool
+	// ball - second transformation, inherits from pool
 	glm::mat4 ballTransform = poolTransform;
 
 	float slideX = sin(time * 0.9f ) * 0.3f;  // sides
@@ -1007,6 +1008,44 @@ void renderObjects::drawHandler::drawPoolMethod( float time, const glm::mat4& vi
 
 		glBindVertexArray(ballGeometry[i]->vertexArrayObject);
 		glDrawElements(GL_TRIANGLES, ballGeometry[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+	// hat - third hierarchical transformation, inherits from ball, tilting and moving
+	glm::mat4 hatTransform = ballTransform;
+
+	float tinySlideX = sin(time * 1.9f) * 0.3f;  
+	float tinySlideZ = cos(time * 0.9f) * 0.3f; 
+	float liftY = 1.0f;
+
+	float tiltAngleX = tinySlideZ * 45.0f;  // tilt to side - faster so it looks like it slips a bit
+	float tiltAngleZ = -tinySlideX * 45.0f;   // tilt to front/back
+
+	glm::mat4 wobbleTilt = glm::rotate(glm::mat4(1.0f), glm::radians(tiltAngleX), glm::vec3(1.0f, 0.0f, 0.0f));
+	wobbleTilt = glm::rotate(wobbleTilt, glm::radians(tiltAngleZ), glm::vec3(0.0f, 0.0f, 1.0f));
+
+	glm::mat4 localOffset = glm::translate(glm::mat4(1.0f), glm::vec3(tinySlideX, liftY, tinySlideZ));
+
+	hatTransform = hatTransform * localOffset * wobbleTilt;
+
+	//glm::mat4 localWobble = glm::translate(glm::mat4(1.0f), glm::vec3(tinySlideX, liftY, tinySlideZ));
+	//thirdBallTransform = thirdBallTransform * localWobble;
+
+	// Scale
+	hatTransform = glm::scale(hatTransform, glm::vec3(1.0, 1.0, 1.0) * (props["ball"].size));
+
+	// Draw hat
+	glUseProgram(shaderProgram.program);
+
+	uniSetter.setTransformUniforms(hatTransform, viewMatrix, projectionMatrix, shaderProgram);
+
+	for (int i = 0; i < hatGeometry.size(); i++) {
+
+		uniSetter.setMaterialUniforms(hatGeometry[i], shaderProgram, gameUni);
+
+		glBindVertexArray(hatGeometry[i]->vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, hatGeometry[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
 	}
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -1293,7 +1332,7 @@ void renderObjects::cleanupModels() {
 	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
 		cleanupGeometry(*it);
 	}
-	v = secBallGeometry;
+	v = hatGeometry;
 	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
 		cleanupGeometry(*it);
 	}
