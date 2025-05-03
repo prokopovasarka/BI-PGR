@@ -64,6 +64,39 @@ void gameEngine::maxwellHandler::createMaxwell() {
 	gameObjects.maxwellObj = newMaxwell;
 }
 
+// create Maxwell object
+void gameEngine::poolHandler::createPool() {
+	Object* newPool = new Object;
+
+	newPool->position = m_loadProps["pool"].position;
+	newPool->direction = m_loadProps["pool"].front;
+	newPool->origPos = m_loadProps["pool"].position;
+	newPool->size = m_loadProps["pool"].size;
+	newPool->angle = m_loadProps["pool"].size;
+
+	newPool->destroyed = false;
+	newPool->startTime = gameState.elapsedTime;
+	newPool->currentTime = newPool->startTime;
+
+	gameObjects.poolObj = newPool;
+}
+
+void gameEngine::poolHandler::createBall() {
+	Object* newBall = new Object;
+
+	newBall->position = m_loadProps["ball"].position;
+	newBall->direction = m_loadProps["ball"].front;
+	newBall->origPos = m_loadProps["ball"].position;
+	newBall->size = m_loadProps["ball"].size;
+	newBall->angle = m_loadProps["ball"].size;
+
+	newBall->destroyed = false;
+	newBall->startTime = gameState.elapsedTime;
+	newBall->currentTime = newBall->startTime;
+
+	gameObjects.ballObj = newBall;
+}
+
 //----------------------------------------------------------INTERACTION WITH OBJECTS------------------------------------------------------
 void createExplosion(glm::vec3 position) {
 	Explosion* newExplosion = new Explosion;
@@ -193,6 +226,8 @@ void gameEngine::restartGame() {
 	duckAnimation = true;
 	m_duckHandler.createDuck();
 	m_maxwellHandler.createMaxwell();
+	m_poolHandler.createPool();
+	m_poolHandler.createBall();
 
 	// exit from free camera
 	if (gameState.freeCameraMode == true) {
@@ -274,6 +309,7 @@ void gameEngine::screenHandler::drawWindowContents( bool drawWater ) {
 	glStencilFunc(GL_ALWAYS, 3, -1);
 	renderHandler.getDrawHandler().drawMaxwell(viewMatrix, projectionMatrix, shaderProgram, gameUniVars, m_loadProps["maxwell"], gameObjects.maxwellObj->position, gameObjects.maxwellObj->direction); //draw maxwell
 	glDisable(GL_STENCIL_TEST);
+	renderHandler.getDrawHandler().drawPoolMethod( gameState.elapsedTime, viewMatrix, shaderProgram, gameObjects.poolObj, gameObjects.ballObj, gameUniVars, m_loadProps, projectionMatrix); //draw pool
 	renderHandler.getDrawHandler().drawEverything(viewMatrix, projectionMatrix, drawWater, m_loadProps, waterFBOHandler); // draw almost all meshes
 
 	//update loading bar

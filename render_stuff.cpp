@@ -29,6 +29,11 @@ std::vector<MeshGeometry*> maxwellGeometry;
 std::vector<MeshGeometry*> duckGeometry;
 std::vector<MeshGeometry*> balloonGeometry;
 std::vector<MeshGeometry*> boatGeometry;
+std::vector<MeshGeometry*> poolGeometry;
+std::vector<MeshGeometry*> ballGeometry;
+std::vector<MeshGeometry*> secBallGeometry;
+
+
 
 // paths to textures
 const char* SKYBOX_CUBE_TEXTURE_FILE_PREFIX = "data/skybox/skybox";
@@ -46,6 +51,9 @@ const char* SPHERE_MODEL_PATH = "data/models/icosphere.obj";
 const char* DUCK_MODEL_PATH = "data/models/duck/duck.obj";
 const char* BALLOON_MODEL_PATH = "data/models/balloons/balloon.obj";
 const char* BOAT_MODEL_PATH = "data/models/boat/v_boat.obj";
+const char* POOL_MODEL_PATH = "data/models/pool/InflatablePool.obj";
+const char* BALL_MODEL_PATH = "data/models/ball/untitled.obj";
+
 
 //textures
 GLuint loadingBarTexture;
@@ -804,7 +812,16 @@ void renderObjects::initHandler::initializeModels(waterBufferMaker* waterFBOHand
 		std::cerr << "initializeModels(): balloon model loading failed." << std::endl;
 	}
 	if (loadMesh(BOAT_MODEL_PATH, shaderProgram, &boatGeometry) != true) {
-		std::cerr << "initializeModels(): balloon model loading failed." << std::endl;
+		std::cerr << "initializeModels(): boat model loading failed." << std::endl;
+	}
+	if (loadMesh(POOL_MODEL_PATH, shaderProgram, &poolGeometry) != true) {
+		std::cerr << "initializeModels(): pool model loading failed." << std::endl;
+	}
+	if (loadMesh(BALL_MODEL_PATH, shaderProgram, &ballGeometry) != true) {
+		std::cerr << "initializeModels(): ball model loading failed." << std::endl;
+	}
+	if (loadMesh(BALL_MODEL_PATH, shaderProgram, &secBallGeometry) != true) {
+		std::cerr << "initializeModels(): ball model loading failed." << std::endl;
 	}
 }
 
@@ -937,6 +954,62 @@ void renderObjects::drawHandler::drawObject(const glm::mat4& viewMatrix, const g
 	glBindVertexArray(0);
 	glUseProgram(0);
 	return;
+}
+
+//draw ang align objects - hierarchical transformation
+void renderObjects::drawHandler::drawPoolMethod( float time, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, Object* poolObj, Object* ballObj, GameUniformVariables gameUni, std::map<std::string, ObjectProp>& props, const glm::mat4& projectionMatrix) {
+	
+	float baseAngle = sin(time) * 5.0f;
+	glm::mat4 waveMatrix = glm::rotate(glm::mat4(1.0f),
+		glm::radians(baseAngle), 
+		glm::vec3(1.0f, 0.0f, 0.0f)); 
+
+	glm::mat4 alignMatrix = splineHandler::alignObject(poolObj->position, props["pool"].front, props["pool"].up);
+
+// 2. pool transformation
+	glm::mat4 poolTransform = alignMatrix * waveMatrix;
+
+	// draw Pool
+	glUseProgram(shaderProgram.program);
+
+	poolTransform = glm::scale(poolTransform, glm::vec3(1.0, 1.0, 1.0) * props["pool"].size);
+	uniSetter.setTransformUniforms(poolTransform, viewMatrix, projectionMatrix, shaderProgram);
+
+	for (int i = 0; i < poolGeometry.size(); i++) {
+
+		uniSetter.setMaterialUniforms(poolGeometry[i], shaderProgram, gameUni);
+
+		glBindVertexArray(poolGeometry[i]->vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, poolGeometry[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+	// 3. ball - inherit from pool
+	glm::mat4 ballTransform = poolTransform;
+
+	float slideX = sin(time * 0.9f ) * 0.3f;  // sides
+	float slideZ = cos(time * 0.9f) * 0.5f;  // front&back
+
+	glm::mat4 ballLocalOffset = glm::translate(glm::mat4(1.0f), glm::vec3(slideX, 0.0f, slideZ));
+
+	ballTransform = ballTransform * ballLocalOffset;
+
+	// draw Ball
+	glUseProgram(shaderProgram.program);
+
+	ballTransform = glm::scale(ballTransform, glm::vec3(1.0, 1.0, 1.0) * props["ball"].size);
+	uniSetter.setTransformUniforms(ballTransform, viewMatrix, projectionMatrix, shaderProgram);
+
+	for (int i = 0; i < ballGeometry.size(); i++) {
+
+		uniSetter.setMaterialUniforms(ballGeometry[i], shaderProgram, gameUni);
+
+		glBindVertexArray(ballGeometry[i]->vertexArrayObject);
+		glDrawElements(GL_TRIANGLES, ballGeometry[i]->numTriangles * 3, GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 // draw platform model
@@ -1209,6 +1282,18 @@ void renderObjects::cleanupModels() {
 		cleanupGeometry(*it);
 	}
 	v = boatGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
+	v = poolGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
+	v = ballGeometry;
+	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
+		cleanupGeometry(*it);
+	}
+	v = secBallGeometry;
 	for (std::vector<MeshGeometry*>::iterator it = v.begin(); it != v.end(); ++it) {
 		cleanupGeometry(*it);
 	}

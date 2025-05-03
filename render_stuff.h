@@ -79,6 +79,8 @@ public:
 			MeshGeometry** geometry, GameUniformVariables gameUni, glm::vec3 houœePosition);
 		void drawPlatform(ObjectProp platformProps, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram,
 			MeshGeometry** geometry, GameUniformVariables gameUni, const glm::mat4& projectionMatrix);
+		void drawPoolMethod( float time, const glm::mat4& viewMatrix, SCommonShaderProgram& shaderProgram, 
+			Object* poolObj, Object* ballObj, GameUniformVariables gameUni, std::map<std::string, ObjectProp>& props, const glm::mat4& projectionMatrix);
 		void drawExplosionMet(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix, ExplosionShaderProgram& explosionShader, Explosion* explosion, MeshGeometry** geometry);
 	};
 

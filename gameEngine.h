@@ -46,6 +46,8 @@ struct
     Camera* camera; //camera object
     Object* duck; //duck object
     Object* maxwellObj; //maxwell object
+    Object* poolObj; // pool object
+    Object* ballObj; //ball object
 
 } gameObjects;
 
@@ -58,6 +60,8 @@ class gameEngine {
 public:
     gameEngine() {
         m_duckHandler = duckHandler();
+        m_maxwellHandler = maxwellHandler();
+        m_poolHandler = poolHandler();
         m_screenHandler = screenHandler();
         m_keyBoardHandler = keyBoardHandler();
     }
@@ -87,6 +91,15 @@ public:
     public:
         void createMaxwell();
         void updateMaxwell(float elapsedTime);
+    };
+
+    /// <summary>
+    /// handling hierarchy transformation
+    /// </summary>
+    struct poolHandler {
+    public:
+        void createBall();
+        void createPool();
     };
 
     /// <summary>
@@ -120,6 +133,7 @@ public:
 private:
     duckHandler m_duckHandler;
     maxwellHandler m_maxwellHandler;
+    poolHandler m_poolHandler;
     screenHandler m_screenHandler;
     keyBoardHandler m_keyBoardHandler;
     static cameraHandler camHandler;
